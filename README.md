@@ -23,25 +23,25 @@ Clone into a short path without spaces (for example `C:\dev\` on Windows), not a
 macOS / Linux:
 
 ```bash
-./mvnw clean compile                # build
-./mvnw test                         # run the unit tests
-./mvnw test -Dtest=ClassName#method # run a single test
-./mvnw javafx:run                   # play
-./mvnw javafx:run -Dseed=42         # play a specific dungeon (numbers or words, e.g. -Dseed=towson)
+bash ./mvnw clean compile                  # build
+bash ./mvnw test                           # run the unit tests and generate the JaCoCo report
+bash ./mvnw test -Dtest=ClassName#method    # run a single test
+bash ./mvnw javafx:run                     # play
+bash ./mvnw javafx:run -Dseed=42            # play a specific dungeon (numbers or words, e.g. -Dseed=towson)
 ```
 
-Windows: use `mvnw.cmd` instead of `./mvnw` (in PowerShell, `.\mvnw.cmd`).
+On Windows, replace `bash ./mvnw` with `.\mvnw.cmd` in PowerShell.
 
-The build also declares these plugins:
+The full quality check runs JUnit, JaCoCo, PIT mutation testing, and SpotBugs.
 
 ```bash
-./mvnw test                                       # also writes a JaCoCo report to target/site/jacoco/
-./mvnw org.pitest:pitest-maven:mutationCoverage   # PIT; report in target/pit-reports/
-./mvnw compile spotbugs:spotbugs spotbugs:gui     # SpotBugs
+bash ./mvnw -B clean verify -Pquality
 ```
 
-A GitHub Actions workflow in `.github/workflows/quality.yml` builds the project and runs the tests on
-every push and pull request.
+JaCoCo reports go to `target/site/jacoco/`, PIT reports to `target/pit-reports/`, and SpotBugs findings
+to `target/spotbugsXml.xml`. PIT and SpotBugs report findings without enforcing a score or violation
+threshold. The [GitHub Actions workflow](.github/workflows/quality.yml) runs the same build on every
+push and pull request and uploads the results as the `quality-reports` artifact.
 
 The first run takes a minute or two while dependencies download.
 
@@ -62,9 +62,9 @@ A run record is plain text: the seed, difficulty, name, and every action taken. 
 without opening the game window:
 
 ```bash
-./mvnw -q exec:java                                        # replays last-run.txt
-./mvnw -q exec:java -Dreplay="path/to/run.txt --map"       # another record, and print the map
-./mvnw -q exec:java -Dreplay="path/to/run.txt --steps=150" # stop after the first 150 actions
+bash ./mvnw -q exec:java                                        # replays last-run.txt
+bash ./mvnw -q exec:java -Dreplay="path/to/run.txt --map"         # another record, and print the map
+bash ./mvnw -q exec:java -Dreplay="path/to/run.txt --steps=150"   # stop after the first 150 actions
 ```
 
 `-Dhalls7800.home=<folder>` makes the game use a different folder for these files.

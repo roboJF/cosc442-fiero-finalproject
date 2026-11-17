@@ -4,22 +4,36 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
       - name: Set up Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
           cache: maven
 
-      - name: Build and run the tests
-        run: ./mvnw -B clean test
+      - name: Run tests, PIT, and SpotBugs
+        run: bash ./mvnw -B clean verify -Pquality
 
-      # Additional steps can be added here.
+      - name: Upload quality reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: quality-reports
+          path: |
+            target/surefire-reports/
+            target/site/jacoco/
+            target/pit-reports/
+            target/spotbugsXml.xml
