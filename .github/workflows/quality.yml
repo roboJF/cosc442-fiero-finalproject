@@ -10,6 +10,10 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
 
     steps:
       - name: Check out the repository
@@ -67,3 +71,11 @@ jobs:
             target/site/jacoco/
             target/pit-reports/
             target/spotbugsXml.xml
+            target/spotbugs.sarif
+
+      - name: Upload SpotBugs results to code scanning
+        if: ${{ !cancelled() && steps.quality.outcome == 'success' }}
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: target/spotbugs.sarif
+          category: spotbugs

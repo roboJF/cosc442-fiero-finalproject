@@ -40,11 +40,12 @@ bash ./mvnw -B clean verify -Pquality
 
 JaCoCo requires at least 30% line coverage and 20% branch coverage across the project. Its HTML and
 XML reports go to `target/site/jacoco/`. PIT and SpotBugs publish findings for review in
-`target/pit-reports/` and `target/spotbugsXml.xml`.
+`target/pit-reports/`, `target/spotbugsXml.xml`, and `target/spotbugs.sarif`.
 
 The [GitHub Actions workflow](.github/workflows/quality.yml) runs the same build on every push and
 pull request, shows line and branch coverage in the run summary, and uploads the available results
-as the `quality-reports` artifact.
+as the `quality-reports` artifact. It also sends SpotBugs SARIF to GitHub code scanning on successful
+builds. On private repositories, enable GitHub Code Security to receive the alerts.
 
 The first run takes a minute or two while dependencies download.
 

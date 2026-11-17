@@ -180,6 +180,11 @@
                                 <goals>
                                     <goal>spotbugs</goal>
                                 </goals>
+                                <configuration>
+                                    <sarifOutput>true</sarifOutput>
+                                    <sarifOutputFilename>spotbugs.sarif</sarifOutputFilename>
+                                    <sarifFullPath>true</sarifFullPath>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

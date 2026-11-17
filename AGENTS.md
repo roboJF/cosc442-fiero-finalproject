@@ -18,5 +18,6 @@ Run the relevant Maven checks after code or test edits.
 
 - Run `.\mvnw.cmd test` on Windows or `bash ./mvnw test` on macOS and Linux for JUnit and the JaCoCo report.
 - Run the full quality build with `.\mvnw.cmd -B clean verify -Pquality` on Windows or `bash ./mvnw -B clean verify -Pquality` on macOS and Linux. JaCoCo enforces project-wide minimums of 30% line coverage and 20% branch coverage. PIT and SpotBugs publish findings for review.
-- Look for JaCoCo HTML and XML in `target/site/jacoco/`, PIT results in `target/pit-reports/`, SpotBugs findings in `target/spotbugsXml.xml`, and JUnit results in `target/surefire-reports/`.
-- GitHub Actions runs the full quality build on pushes and pull requests with Temurin 17 on Ubuntu. It invokes the wrapper through Bash, uses read-only repository access, shows coverage in the run summary, and uploads the available reports as `quality-reports`.
+- Look for JaCoCo HTML and XML in `target/site/jacoco/`, PIT results in `target/pit-reports/`, SpotBugs reports in `target/spotbugsXml.xml` and `target/spotbugs.sarif`, and JUnit results in `target/surefire-reports/`.
+- GitHub Actions runs the full quality build on pushes and pull requests with Temurin 17 on Ubuntu. It invokes the wrapper through Bash, shows coverage in the run summary, and uploads the available reports as `quality-reports`.
+- The quality job requests read access to repository contents and Actions metadata, plus `security-events: write` to upload SpotBugs SARIF to GitHub code scanning under the `spotbugs` category.
