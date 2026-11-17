@@ -26,6 +26,7 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 /**
  * The JavaFX application: moves between the title screen and the game, and handles saving,
@@ -37,8 +38,8 @@ import javafx.stage.Stage;
  */
 public class HallsApp extends Application implements TitleScreen.Actions, GameView.Listener {
 
-    private final SaveStore store = SaveStore.standard();
-    private final AudioPlayer audio = new AudioPlayer();
+    private final SaveStore store;
+    private AudioPlayer audio;
     private Stage stage;
     private Scene scene;
     private Screen screen;
@@ -47,8 +48,18 @@ public class HallsApp extends Application implements TitleScreen.Actions, GameVi
     private String playerName = GameFactory.DEFAULT_PLAYER_NAME;
     private Difficulty difficulty = Difficulty.UNDERGRADUATE;
 
+    /** Creates the application with the standard save location. */
+    public HallsApp() {
+        this(SaveStore.standard());
+    }
+
+    HallsApp(SaveStore store) {
+        this.store = store;
+    }
+
     @Override
     public void start(Stage primaryStage) {
+        audio = new AudioPlayer();
         this.stage = primaryStage;
         this.seedArgument = getParameters().getNamed().get("seed");
         showTitle(0, null);
@@ -67,7 +78,7 @@ public class HallsApp extends Application implements TitleScreen.Actions, GameVi
         stage.setScene(scene);
         stage.setMinWidth(640);
         stage.setMinHeight(480);
-        stage.setOnCloseRequest(e -> saveIfInProgress());
+        stage.setOnCloseRequest(event -> closeWindow(event, current));
         stage.show();
     }
 
@@ -111,13 +122,11 @@ public class HallsApp extends Application implements TitleScreen.Actions, GameVi
 
     @Override
     public void quitToTitle(GameSession session) {
-        recordAchievements(session);
-        String notice = session.isTutorial() ? null : "Game saved. Choose Continue to pick up where you left off.";
-        if (!session.isTutorial()) {
-            notice = save(session) ? notice : "Could not save the game.";
+        if (!saveBeforeLeaving(session)) {
+            return;
         }
         current = null;
-        showTitle(0, notice);
+        showTitle(0, session.isTutorial() ? null : "Game saved. Choose Continue to pick up where you left off.");
     }
 
     @Override
@@ -200,22 +209,26 @@ public class HallsApp extends Application implements TitleScreen.Actions, GameVi
         }
     }
 
-    private void saveIfInProgress() {
-        if (current != null && !current.isTutorial() && current.phase() == GamePhase.PLAYING) {
-            save(current);
-        }
-        if (current != null) {
-            recordAchievements(current);
+    void closeWindow(WindowEvent event, GameSession session) {
+        if (session != null && !saveBeforeLeaving(session)) {
+            event.consume();
         }
     }
 
-    private boolean save(GameSession session) {
-        try {
-            store.saveRun(RunRecord.of(session));
-            return true;
-        } catch (UncheckedIOException e) {
-            return false;
+    private boolean saveBeforeLeaving(GameSession session) {
+        if (!session.isTutorial() && session.phase() == GamePhase.PLAYING) {
+            try {
+                store.saveRun(RunRecord.of(session));
+            } catch (UncheckedIOException e) {
+                session.message("Could not save the game. Check the save folder and try again.");
+                if (screen instanceof GameView view) {
+                    view.refresh();
+                }
+                return false;
+            }
         }
+        recordAchievements(session);
+        return true;
     }
 
     /**

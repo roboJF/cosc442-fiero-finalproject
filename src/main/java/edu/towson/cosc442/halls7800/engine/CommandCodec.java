@@ -2,6 +2,7 @@ package edu.towson.cosc442.halls7800.engine;
 
 import edu.towson.cosc442.halls7800.progression.Perk;
 import edu.towson.cosc442.halls7800.world.Direction;
+import java.util.function.Consumer;
 
 /**
  * Converts recorded tokens back into actions. A run recording is a list of tokens, one per player
@@ -29,25 +30,11 @@ public final class CommandCodec {
      */
     public static Command decode(String token) {
         String[] parts = token.trim().split(":", 2);
-        String code = parts[0];
-        String arg = parts.length > 1 ? parts[1] : null;
-        try {
-            return switch (code) {
-                case "M" -> new MoveCommand(Direction.valueOf(arg));
-                case "W" -> new WaitCommand();
-                case "F" -> new SearchCommand();
-                case "G" -> new PickUpCommand();
-                case "S" -> "D".equals(arg) ? StairsCommand.descend() : StairsCommand.ascend();
-                case "X" -> new CloseDoorCommand("*".equals(arg) ? null : Direction.valueOf(arg));
-                case "R" -> new DropCommand(Integer.parseInt(arg));
-                case "U" -> new UseItemCommand(Integer.parseInt(arg));
-                case "T" -> new ThrowCommand(Integer.parseInt(arg));
-                case "BUY", "SELL", "PERK", "SHOP" -> null;
-                default -> throw new IllegalArgumentException("Unknown token '" + token + "'");
-            };
-        } catch (NullPointerException | IllegalArgumentException e) {
-            throw new IllegalArgumentException("Malformed token '" + token + "'", e);
+        Command command = decodeCommand(parts);
+        if (command == null) {
+            decodeMenuAction(parts);
         }
+        return command;
     }
 
     /**
@@ -58,18 +45,68 @@ public final class CommandCodec {
      * @param token the recorded token
      */
     public static void apply(GameSession session, String token) {
-        Command command = decode(token);
+        String[] parts = token.trim().split(":", 2);
+        Command command = decodeCommand(parts);
         if (command != null) {
             session.submit(command);
-            return;
+        } else {
+            decodeMenuAction(parts).accept(session);
         }
-        String[] parts = token.trim().split(":", 2);
-        switch (parts[0]) {
-            case "BUY" -> session.buy(Integer.parseInt(parts[1]));
-            case "SELL" -> session.sell(Integer.parseInt(parts[1]));
-            case "PERK" -> session.choosePerk(Perk.valueOf(parts[1]));
-            case "SHOP" -> session.closeShop();
-            default -> throw new IllegalArgumentException("Unknown token '" + token + "'");
+    }
+
+    private static Command decodeCommand(String[] parts) {
+        String arg = parts.length == 2 ? parts[1] : "";
+        return switch (parts[0]) {
+            case "M" -> new MoveCommand(Direction.valueOf(arg));
+            case "W" -> withoutArgument(parts, new WaitCommand());
+            case "F" -> withoutArgument(parts, new SearchCommand());
+            case "G" -> withoutArgument(parts, new PickUpCommand());
+            case "S" -> switch (arg) {
+                case "D" -> StairsCommand.descend();
+                case "U" -> StairsCommand.ascend();
+                default -> throw new IllegalArgumentException("Stairs direction must be D or U");
+            };
+            case "X" -> new CloseDoorCommand("*".equals(arg) ? null : Direction.valueOf(arg));
+            case "R" -> new DropCommand(Integer.parseInt(arg));
+            case "U" -> new UseItemCommand(Integer.parseInt(arg));
+            case "T" -> new ThrowCommand(Integer.parseInt(arg));
+            case "BUY", "SELL", "PERK", "SHOP" -> null;
+            default -> throw new IllegalArgumentException("Unknown action '" + parts[0] + "'");
+        };
+    }
+
+    private static Command withoutArgument(String[] parts, Command command) {
+        if (parts.length != 1) {
+            throw new IllegalArgumentException(parts[0] + " takes no argument");
         }
+        return command;
+    }
+
+    private static Consumer<GameSession> decodeMenuAction(String[] parts) {
+        if (parts.length != 2 || parts[1].isEmpty()) {
+            throw new IllegalArgumentException(parts[0] + " requires an argument");
+        }
+        String arg = parts[1];
+        return switch (parts[0]) {
+            case "BUY" -> {
+                int index = Integer.parseInt(arg);
+                yield session -> session.buy(index);
+            }
+            case "SELL" -> {
+                int slot = Integer.parseInt(arg);
+                yield session -> session.sell(slot);
+            }
+            case "PERK" -> {
+                Perk perk = Perk.valueOf(arg);
+                yield session -> session.choosePerk(perk);
+            }
+            case "SHOP" -> {
+                if (!"CLOSE".equals(arg)) {
+                    throw new IllegalArgumentException("Shop action must be CLOSE");
+                }
+                yield GameSession::closeShop;
+            }
+            default -> throw new IllegalArgumentException("Unknown menu action '" + parts[0] + "'");
+        };
     }
 }

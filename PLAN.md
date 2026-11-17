@@ -2,12 +2,12 @@
 
 The review covered all production packages and the test suite, with headless checks for replay, turn timing, state ownership, and floor generation. Add regression tests as each fix is made, then use them to verify the refactors. [Beta reports](BUGS.md) · [Quality baseline](BASELINE.md)
 
-## 1. Protect save and replay integrity
+## 1. Protect save and replay integrity (Completed)
 
-Continue rebuilds the game from the seed and action log. Stunned turns are missing from that log, and headless checks confirmed that malformed stair and shop tokens can be accepted. Quitting to the title also discards the active session if writing the save fails. These paths can change or lose player progress. [ReplayRunner] · [CommandCodec] · [HallsApp]
+Continue rebuilds the game from the seed and action log. The log now includes inputs that consume a stunned turn, and replay rejects malformed tokens with the one-based action number. Both exit paths keep the active run available for retry if saving fails. [ReplayRunner] · [CommandCodec] · [HallsApp]
 
-- Record inputs that consume a stunned turn. Validate token arguments and report the failing action index. Test a snare save, a multi-floor save, malformed records, and representative older saves. Document the limits of restoring records with missing turns.
-- Keep the active game available for retry when saving fails. Test both quitting to the title and closing the window with an unwritable save location.
+- Regression tests cover a snare save, changes on a revisited floor, invalid actions, a version 1 save, and both exit handlers with an unwritable save location.
+- Version 1 records remain readable. Turns omitted by earlier builds cannot be recovered from the action log. [Save and replay notes](README.md#seeds-saves-and-replays)
 
 ## 2. Refactor action rules shared by the engine and UI
 

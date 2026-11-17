@@ -84,7 +84,13 @@ public final class ReplayTool {
             out.println("Could not read run record " + file + ": " + e.getMessage());
             return 1;
         }
-        GameSession session = ReplayRunner.replay(record, steps);
+        GameSession session;
+        try {
+            session = ReplayRunner.replay(record, steps);
+        } catch (IllegalArgumentException e) {
+            out.println("Could not replay run record " + file + ": " + e.getMessage());
+            return 1;
+        }
         printSummary(out, file, record, session, Math.min(steps, record.actions().size()));
         if (map) {
             out.println();

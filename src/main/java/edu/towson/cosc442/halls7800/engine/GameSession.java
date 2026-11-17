@@ -134,11 +134,11 @@ public class GameSession {
         if (phase != GamePhase.PLAYING) {
             return CommandResult.rejected("The run is over.");
         }
+        recording.add(command.encode());
         CommandResult result;
         if (player.effects().has(EffectType.STUNNED)) {
             result = CommandResult.acted(player.actionCost(), "You are stunned and cannot act!");
         } else {
-            recording.add(command.encode());
             result = command.execute(this);
         }
         if (result.message() != null) {
