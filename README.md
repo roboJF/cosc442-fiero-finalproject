@@ -38,14 +38,20 @@ The full quality check runs JUnit, JaCoCo, PIT mutation testing, and SpotBugs.
 bash ./mvnw -B clean verify -Pquality
 ```
 
-JaCoCo requires at least 30% line coverage and 20% branch coverage across the project. Its HTML and
-XML reports go to `target/site/jacoco/`. PIT and SpotBugs publish findings for review in
-`target/pit-reports/`, `target/spotbugsXml.xml`, and `target/spotbugs.sarif`.
+JaCoCo requires at least 45% line coverage and 38% branch coverage across the project. Its HTML and
+XML reports go to `target/site/jacoco/`. PIT writes HTML and XML reports to `target/pit-reports/`.
+SpotBugs publishes `target/spotbugsXml.xml` and `target/spotbugs.sarif`.
+
+The JavaFX smoke test opens the game, saves a run to a temporary directory, and continues it from
+the title screen. Add `-Dhalls7800.javafxSmoke=true` to a Maven test or verify command on a desktop
+with a display. To run it alone, also add `-Dtest=HallsAppSmokeTest`. On Linux without a desktop,
+prefix the command with `xvfb-run -a`.
 
 The [GitHub Actions workflow](.github/workflows/quality.yml) runs the same build on every push and
-pull request, shows line and branch coverage in the run summary, and uploads the available results
-as the `quality-reports` artifact. It also sends SpotBugs SARIF to GitHub code scanning on successful
-builds. On private repositories, enable GitHub Code Security to receive the alerts.
+pull request with the JavaFX smoke test enabled under Xvfb. It shows line and branch coverage in the
+run summary and uploads the available results as the `quality-reports` artifact. It also sends
+SpotBugs SARIF to GitHub code scanning on successful builds. On private repositories, enable GitHub
+Code Security to receive the alerts.
 
 The first run takes a minute or two while dependencies download.
 

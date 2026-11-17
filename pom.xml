@@ -67,6 +67,11 @@
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
+                        <configuration>
+                            <includes>
+                                <include>edu/towson/cosc442/halls7800/*</include>
+                            </includes>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>report</id>
@@ -119,9 +124,9 @@
         <profile>
             <id>quality</id>
             <properties>
-                <!-- Initial minimums based on BASELINE.md. -->
-                <quality.coverage.line.minimum>30%</quality.coverage.line.minimum>
-                <quality.coverage.branch.minimum>20%</quality.coverage.branch.minimum>
+                <!-- Keep the minimums below the headless results recorded in PLAN.md. -->
+                <quality.coverage.line.minimum>45%</quality.coverage.line.minimum>
+                <quality.coverage.branch.minimum>38%</quality.coverage.branch.minimum>
             </properties>
             <build>
                 <plugins>
@@ -167,6 +172,16 @@
                                 <goals>
                                     <goal>mutationCoverage</goal>
                                 </goals>
+                                <configuration>
+                                    <outputFormats>
+                                        <param>HTML</param>
+                                        <param>XML</param>
+                                    </outputFormats>
+                                    <!-- JavaFX can launch only once per JVM. Surefire runs this test. -->
+                                    <excludedTestClasses>
+                                        <param>edu.towson.cosc442.halls7800.app.HallsAppSmokeTest</param>
+                                    </excludedTestClasses>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

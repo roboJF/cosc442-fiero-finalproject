@@ -30,7 +30,7 @@ jobs:
 
       - name: Run tests, JaCoCo, PIT, and SpotBugs
         id: quality
-        run: bash ./mvnw -B clean verify -Pquality
+        run: xvfb-run -a bash ./mvnw -B clean verify -Pquality -Dhalls7800.javafxSmoke=true
 
       - name: Summarize JaCoCo coverage
         if: ${{ !cancelled() }}

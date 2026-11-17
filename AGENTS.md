@@ -17,7 +17,8 @@
 Run the relevant Maven checks after code or test edits.
 
 - Run `.\mvnw.cmd test` on Windows or `bash ./mvnw test` on macOS and Linux for JUnit and the JaCoCo report.
-- Run the full quality build with `.\mvnw.cmd -B clean verify -Pquality` on Windows or `bash ./mvnw -B clean verify -Pquality` on macOS and Linux. JaCoCo enforces project-wide minimums of 30% line coverage and 20% branch coverage. PIT and SpotBugs publish findings for review.
+- Run the full quality build with `.\mvnw.cmd -B clean verify -Pquality` on Windows or `bash ./mvnw -B clean verify -Pquality` on macOS and Linux. JaCoCo enforces project-wide minimums of 45% line coverage and 38% branch coverage. PIT and SpotBugs publish findings for review.
+- Add `-Dhalls7800.javafxSmoke=true` to a Maven test or verify command when a display is available. The JavaFX smoke test uses a temporary save directory. Surefire runs it, and PIT excludes it.
 - Look for JaCoCo HTML and XML in `target/site/jacoco/`, PIT results in `target/pit-reports/`, SpotBugs reports in `target/spotbugsXml.xml` and `target/spotbugs.sarif`, and JUnit results in `target/surefire-reports/`.
-- GitHub Actions runs the full quality build on pushes and pull requests with Temurin 17 on Ubuntu. It invokes the wrapper through Bash, shows coverage in the run summary, and uploads the available reports as `quality-reports`.
+- GitHub Actions runs the full quality build on pushes and pull requests with Temurin 17 on Ubuntu. It enables the JavaFX smoke test under Xvfb, shows coverage in the run summary, and uploads the available reports as `quality-reports`.
 - The quality job requests read access to repository contents and Actions metadata, plus `security-events: write` to upload SpotBugs SARIF to GitHub code scanning under the `spotbugs` category.

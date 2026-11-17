@@ -1,8 +1,11 @@
 package edu.towson.cosc442.halls7800.combat;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import edu.towson.cosc442.halls7800.effect.EffectType;
 import edu.towson.cosc442.halls7800.entity.Monster;
 import edu.towson.cosc442.halls7800.entity.MonsterType;
 import edu.towson.cosc442.halls7800.entity.Player;
@@ -25,5 +28,72 @@ class CombatResolverTest {
         assertTrue(result.hit());
         assertEquals(3, result.damage());
         assertEquals(MonsterType.OFF_BY_ONE_GOBLIN.maxHp() - 3, goblin.hp());
+    }
+
+    @Test
+    void rollAtTheHitChanceMissesWithoutChangingHealth() {
+        AttackProfile attack = AttackProfile.basic(goblin.evasion(), 4, 4, 0, "hit");
+
+        AttackResult result = CombatResolver.resolve(player, goblin, attack, new ScriptedRng(70));
+
+        assertFalse(result.hit());
+        assertEquals(0, result.damage());
+        assertEquals(goblin.maxHp(), goblin.hp());
+    }
+
+    @Test
+    void sleepingDefenderTakesCriticalDamageWithoutAnArmorRoll() {
+        goblin.setState(Monster.State.SLEEPING);
+        AttackProfile attack = AttackProfile.basic(0, 3, 4, 0, "hit");
+
+        AttackResult result = CombatResolver.resolve(player, goblin, attack, new ScriptedRng(0));
+
+        assertTrue(result.hit());
+        assertTrue(result.critical());
+        assertEquals(5, result.damage());
+        assertEquals(goblin.maxHp() - 5, goblin.hp());
+    }
+
+    @Test
+    void fullShieldAbsorptionSpendsTheShieldInsteadOfHealth() {
+        goblin.applyEffect(EffectType.SHIELDED, 3, 4);
+        AttackProfile attack = AttackProfile.basic(0, 4, 4, 0, "hit");
+
+        AttackResult result = CombatResolver.resolve(player, goblin, attack, new ScriptedRng(0, 99, 0, 0));
+
+        assertTrue(result.hit());
+        assertEquals(4, result.absorbed());
+        assertEquals(0, result.damage());
+        assertEquals(goblin.maxHp(), goblin.hp());
+        assertFalse(goblin.effects().has(EffectType.SHIELDED));
+    }
+
+    @Test
+    void fireImmunityPreventsDamageAndBurning() {
+        Monster wyrm = new Monster(MonsterType.ZERO_DAY_WYRM, new Position(2, 1), false);
+        AttackProfile fire = new AttackProfile(0, 4, 4, DamageType.FIRE, 0, EffectType.BURNING, 100, 3, 1, "burn");
+
+        AttackResult result = CombatResolver.resolve(player, wyrm, fire, new ScriptedRng(0, 99, 0));
+
+        assertTrue(result.hit());
+        assertTrue(result.immune());
+        assertEquals(0, result.damage());
+        assertNull(result.inflicted());
+        assertEquals(wyrm.maxHp(), wyrm.hp());
+        assertFalse(wyrm.effects().has(EffectType.BURNING));
+    }
+
+    @Test
+    void fireThatGetsThroughAShieldCanInflictBurning() {
+        goblin.applyEffect(EffectType.SHIELDED, 3, 2);
+        AttackProfile fire = new AttackProfile(0, 4, 4, DamageType.FIRE, 0, EffectType.BURNING, 100, 3, 1, "burn");
+
+        AttackResult result = CombatResolver.resolve(player, goblin, fire, new ScriptedRng(0, 99, 0, 99));
+
+        assertEquals(2, result.absorbed());
+        assertEquals(2, result.damage());
+        assertEquals(goblin.maxHp() - 2, goblin.hp());
+        assertEquals(EffectType.BURNING, result.inflicted());
+        assertTrue(goblin.effects().has(EffectType.BURNING));
     }
 }

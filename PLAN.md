@@ -16,12 +16,22 @@ New runs decide whether a creature can act before its stun timer ticks. Typed an
 - Regression tests cover one-turn stuns, effect expiry, boss phase changes, and the seed 4 Hydra encounter. A JavaFX smoke test confirmed that typed `>` and Page Down are blocked during examine and perk selection, and that typed stairs work in normal play.
 - New runs use version 2 records. Version 1 runs keep the original stun and trapdoor rules when replayed, continued, and saved again. [Save and replay notes](README.md#seeds-saves-and-replays)
 
-## 3. Expand regression coverage across systems
+## 3. Expand regression coverage across systems (Completed)
 
-The 14-test baseline covers 20.6% of branches, and PIT scored 9%. Save I/O, stairs, boss AI, and the JavaFX interface have no line coverage. A 3,456-floor sample found reachable exits, guardians, and requirements pages where expected. A separate probe showed that fallback layouts miss the validator's open-tile minimum. [Quality baseline](BASELINE.md#test-coverage) · [DungeonGenerator] · [Quality workflow](.github/workflows/quality.yml)
+The suite grew from 43 to 62 test cases. The new tests use fixed maps and scripted combat rolls, and check that stairs, guardians, requirements pages, and vault keys stay reachable across 432 generated floors. Direct fallback tests cover connectivity, borders, optional stairs, and progression. The fallback layouts still fall below the usual open-tile minimum. [Quality baseline](BASELINE.md#test-coverage) · [DungeonGenerator]
 
-- Add fixed-floor and scripted-roll tests for the risky branches. Turn the seed sweep into a bounded regression test, and exercise the fallback directly with explicit playability criteria. Add a JavaFX smoke test for starting, saving, and continuing a run.
-- Compare JaCoCo branch coverage and PIT survivors in the changed classes. Prioritize assertions that catch broken behavior and use the new baseline to decide where CI should enforce thresholds.
+- GitHub Actions enables the JavaFX smoke test under Xvfb. It checks that a player can start a run, save to a temporary directory, continue from the title screen, and save again with both actions recorded. [Quality workflow](.github/workflows/quality.yml)
+- JaCoCo line coverage rose from 46.53% to 57.99% and branch coverage rose from 37.74% to 46.43% with the smoke test enabled. Headless coverage reached 47.88% of lines and 40.66% of branches. CI now enforces project-wide minimums of 45% line and 38% branch coverage, with room for both build modes.
+- Across the classes below, PIT killed 104 of 219 mutants, up from 55. Mutants without coverage fell from 87 to 61. The JavaFX smoke test contributes to JaCoCo coverage and runs outside PIT.
+
+| Class | JaCoCo branches covered | PIT survivors |
+| --- | ---: | ---: |
+| `CombatResolver` | 12/30 → 21/30 | 12 → 7 |
+| `DungeonGenerator` | 5/14 → 10/14 | 2 → 3 |
+| `FloorValidator` | 24/38 → 35/38 | 20 → 10 |
+| `LootPlacer` | 28/33 → 30/33 | 29 → 21 |
+| `ResidentPlacer` | 18/28 → 21/28 | 13 → 12 |
+| `HallsApp` | 7/30 → 16/30 | 1 → 1 |
 
 ## 4. Fix the gameplay rules that cost players progress
 
