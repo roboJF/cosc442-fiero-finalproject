@@ -1,0 +1,14 @@
+edu.towson.cosc442.halls7800.app
+edu.towson.cosc442.halls7800.combat
+edu.towson.cosc442.halls7800.effect
+edu.towson.cosc442.halls7800.engine
+edu.towson.cosc442.halls7800.entity
+edu.towson.cosc442.halls7800.gen
+edu.towson.cosc442.halls7800.item
+edu.towson.cosc442.halls7800.persist
+edu.towson.cosc442.halls7800.progression
+edu.towson.cosc442.halls7800.quest
+edu.towson.cosc442.halls7800.ui
+edu.towson.cosc442.halls7800.ui.audio
+edu.towson.cosc442.halls7800.util
+edu.towson.cosc442.halls7800.world
