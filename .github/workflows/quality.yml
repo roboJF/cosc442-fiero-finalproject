@@ -24,8 +24,38 @@ jobs:
           java-version: '17'
           cache: maven
 
-      - name: Run tests, PIT, and SpotBugs
+      - name: Run tests, JaCoCo, PIT, and SpotBugs
+        id: quality
         run: bash ./mvnw -B clean verify -Pquality
+
+      - name: Summarize JaCoCo coverage
+        if: ${{ !cancelled() }}
+        env:
+          QUALITY_OUTCOME: ${{ steps.quality.outcome }}
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+
+          report = Path("target/site/jacoco/jacoco.xml")
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
+              print("## JaCoCo coverage\n", file=summary)
+              if not report.is_file():
+                  print("JaCoCo did not generate a coverage report.", file=summary)
+                  if os.environ["QUALITY_OUTCOME"] == "success":
+                      raise SystemExit("Expected JaCoCo coverage report is missing.")
+                  raise SystemExit(0)
+
+              root = ET.parse(report).getroot()
+              print("| Metric | Coverage | Covered |", file=summary)
+              print("| --- | ---: | ---: |", file=summary)
+              for metric in ("LINE", "BRANCH"):
+                  counter = root.find(f"./counter[@type='{metric}']")
+                  covered = int(counter.get("covered"))
+                  total = covered + int(counter.get("missed"))
+                  print(f"| {metric.title()} | {covered / total:.2%} | {covered:,} / {total:,} |", file=summary)
+          PY
 
       - name: Upload quality reports
         if: ${{ !cancelled() }}

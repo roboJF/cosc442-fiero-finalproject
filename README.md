@@ -38,10 +38,13 @@ The full quality check runs JUnit, JaCoCo, PIT mutation testing, and SpotBugs.
 bash ./mvnw -B clean verify -Pquality
 ```
 
-JaCoCo reports go to `target/site/jacoco/`, PIT reports to `target/pit-reports/`, and SpotBugs findings
-to `target/spotbugsXml.xml`. PIT and SpotBugs report findings without enforcing a score or violation
-threshold. The [GitHub Actions workflow](.github/workflows/quality.yml) runs the same build on every
-push and pull request and uploads the results as the `quality-reports` artifact.
+JaCoCo requires at least 30% line coverage and 20% branch coverage across the project. Its HTML and
+XML reports go to `target/site/jacoco/`. PIT and SpotBugs publish findings for review in
+`target/pit-reports/` and `target/spotbugsXml.xml`.
+
+The [GitHub Actions workflow](.github/workflows/quality.yml) runs the same build on every push and
+pull request, shows line and branch coverage in the run summary, and uploads the available results
+as the `quality-reports` artifact.
 
 The first run takes a minute or two while dependencies download.
 
