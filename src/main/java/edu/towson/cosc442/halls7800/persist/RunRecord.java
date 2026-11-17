@@ -1,5 +1,6 @@
 package edu.towson.cosc442.halls7800.persist;
 
+import edu.towson.cosc442.halls7800.engine.ActionRules;
 import edu.towson.cosc442.halls7800.engine.Difficulty;
 import edu.towson.cosc442.halls7800.engine.GameSession;
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import java.util.Objects;
  *
  * <p>Text format (one item per line):
  * <pre>
- * HALLS7800-RUN 1
+ * HALLS7800-RUN 2
  * seed=12345
  * difficulty=UNDERGRADUATE
  * name=Ada
@@ -25,21 +26,29 @@ import java.util.Objects;
  * @param difficulty the difficulty
  * @param playerName the adventurer's name
  * @param actions the recorded action tokens, oldest first
+ * @param version the record version, which identifies the action rules used for replay
  */
-public record RunRecord(long seed, Difficulty difficulty, String playerName, List<String> actions) {
+public record RunRecord(long seed, Difficulty difficulty, String playerName, List<String> actions, int version) {
 
     /** First line of every record file. */
     public static final String HEADER = "HALLS7800-RUN";
-    /** Format version written by this build. */
-    public static final int VERSION = 1;
+    /** Version used for new runs. */
+    public static final int VERSION = 2;
+    private static final int LEGACY_VERSION = 1;
 
     /**
      * Validates and copies the fields.
      */
     public RunRecord {
+        validateVersion(version);
         Objects.requireNonNull(difficulty, "difficulty");
         Objects.requireNonNull(playerName, "playerName");
         actions = List.copyOf(actions);
+    }
+
+    /** Creates a record for a run using the current action rules. */
+    public RunRecord(long seed, Difficulty difficulty, String playerName, List<String> actions) {
+        this(seed, difficulty, playerName, actions, VERSION);
     }
 
     /**
@@ -49,13 +58,14 @@ public record RunRecord(long seed, Difficulty difficulty, String playerName, Lis
      * @return its record
      */
     public static RunRecord of(GameSession session) {
-        return new RunRecord(session.seed(), session.difficulty(), session.player().name(), session.recording());
+        int version = session.actionRules() == ActionRules.LEGACY ? LEGACY_VERSION : VERSION;
+        return new RunRecord(session.seed(), session.difficulty(), session.player().name(), session.recording(), version);
     }
 
     /** @return the record as text */
     public String toText() {
         StringBuilder sb = new StringBuilder();
-        sb.append(HEADER).append(' ').append(VERSION).append('\n');
+        sb.append(HEADER).append(' ').append(version).append('\n');
         sb.append("seed=").append(seed).append('\n');
         sb.append("difficulty=").append(difficulty.name()).append('\n');
         sb.append("name=").append(playerName.replace('\n', ' ')).append('\n');
@@ -78,9 +88,7 @@ public record RunRecord(long seed, Difficulty difficulty, String playerName, Lis
             throw new IllegalArgumentException("Not a Halls of 7800 run record");
         }
         int version = Integer.parseInt(lines[0].substring(HEADER.length() + 1).trim());
-        if (version != VERSION) {
-            throw new IllegalArgumentException("Unsupported run record version " + version);
-        }
+        validateVersion(version);
         long seed = Long.parseLong(value(lines[1], "seed"));
         Difficulty difficulty = Difficulty.valueOf(value(lines[2], "difficulty"));
         String name = value(lines[3], "name");
@@ -90,7 +98,17 @@ public record RunRecord(long seed, Difficulty difficulty, String playerName, Lis
                 actions.add(lines[i].trim());
             }
         }
-        return new RunRecord(seed, difficulty, name, actions);
+        return new RunRecord(seed, difficulty, name, actions, version);
+    }
+
+    ActionRules actionRules() {
+        return version == LEGACY_VERSION ? ActionRules.LEGACY : ActionRules.CURRENT;
+    }
+
+    private static void validateVersion(int version) {
+        if (version != LEGACY_VERSION && version != VERSION) {
+            throw new IllegalArgumentException("Unsupported run record version " + version);
+        }
     }
 
     private static String value(String line, String key) {

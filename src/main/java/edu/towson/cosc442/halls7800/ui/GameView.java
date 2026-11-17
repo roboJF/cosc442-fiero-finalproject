@@ -175,60 +175,75 @@ public class GameView extends BorderPane implements Screen {
 
     @Override
     public void keyPressed(KeyCode code) {
-        if (session.phase() != GamePhase.PLAYING) {
-            if (code == KeyCode.ENTER || code == KeyCode.ESCAPE) {
-                listener.runFinished(session);
-            }
-            return;
-        }
-        if (session.isShopOpen()) {
-            onShopKey(code);
-            return;
-        }
-        if (!session.player().perkChoices().isEmpty() && session.phase() == GamePhase.PLAYING) {
-            int choice = switch (code) {
-                case DIGIT1, NUMPAD1 -> 0;
-                case DIGIT2, NUMPAD2 -> 1;
-                case DIGIT3, NUMPAD3 -> 2;
-                default -> -1;
-            };
-            List<Perk> offered = session.player().perkChoices();
-            if (choice >= 0 && choice < offered.size()) {
-                session.choosePerk(offered.get(choice));
-            }
-            refresh();
-            return;
-        }
-        if (lookCursor != null) {
-            Direction d = InputMapper.directionFor(code);
-            if (d != null) {
-                Position next = lookCursor.step(d);
-                if (session.currentFloor().isInBounds(next)) {
-                    lookCursor = next;
+        switch (InputMapper.mode(session, lookCursor != null, pending != ItemAction.NONE)) {
+            case FINISHED -> {
+                if (code == KeyCode.ENTER || code == KeyCode.ESCAPE) {
+                    listener.runFinished(session);
                 }
-            } else if (code == KeyCode.ESCAPE || code == KeyCode.L) {
-                lookCursor = null;
             }
-            refresh();
+            case SHOP -> onShopKey(code);
+            case PERK -> onPerkKey(code);
+            case EXAMINE -> onExamineKey(code);
+            case ITEM -> onItemKey(code);
+            case PLAY -> onPlayKey(code);
+        }
+    }
+
+    @Override
+    public void keyTyped(String character) {
+        KeyCode code = InputMapper.keyForTypedShortcut(character);
+        if (code != null) {
+            keyPressed(code);
+        }
+    }
+
+    private void onPerkKey(KeyCode code) {
+        int choice = switch (code) {
+            case DIGIT1, NUMPAD1 -> 0;
+            case DIGIT2, NUMPAD2 -> 1;
+            case DIGIT3, NUMPAD3 -> 2;
+            default -> -1;
+        };
+        List<Perk> offered = session.player().perkChoices();
+        if (choice >= 0 && choice < offered.size()) {
+            session.choosePerk(offered.get(choice));
+        }
+        refresh();
+    }
+
+    private void onExamineKey(KeyCode code) {
+        Direction direction = InputMapper.directionFor(code);
+        if (direction != null) {
+            Position next = lookCursor.step(direction);
+            if (session.currentFloor().isInBounds(next)) {
+                lookCursor = next;
+            }
+        } else if (code == KeyCode.ESCAPE || code == KeyCode.L) {
+            lookCursor = null;
+        }
+        refresh();
+    }
+
+    private void onItemKey(KeyCode code) {
+        if (code.isLetterKey()) {
+            int slot = Inventory.indexFor(code.getChar().charAt(0));
+            ItemAction action = pending;
+            pending = ItemAction.NONE;
+            submit(switch (action) {
+                case USE -> new UseItemCommand(slot);
+                case DROP -> new DropCommand(slot);
+                case THROW -> new ThrowCommand(slot);
+                default -> null;
+            });
             return;
         }
-        if (pending != ItemAction.NONE) {
-            if (code.isLetterKey()) {
-                int slot = Inventory.indexFor(code.getChar().charAt(0));
-                ItemAction action = pending;
-                pending = ItemAction.NONE;
-                submit(switch (action) {
-                    case USE -> new UseItemCommand(slot);
-                    case DROP -> new DropCommand(slot);
-                    case THROW -> new ThrowCommand(slot);
-                    default -> null;
-                });
-            } else if (code == KeyCode.ESCAPE) {
-                pending = ItemAction.NONE;
-            }
-            refresh();
-            return;
+        if (code == KeyCode.ESCAPE) {
+            pending = ItemAction.NONE;
         }
+        refresh();
+    }
+
+    private void onPlayKey(KeyCode code) {
         if (code == KeyCode.ESCAPE) {
             if (showHelp || showJournal) {
                 showHelp = false;
@@ -272,21 +287,6 @@ public class GameView extends BorderPane implements Screen {
             }
         }
         refresh();
-    }
-
-    @Override
-    public void keyTyped(String character) {
-        if (session.isShopOpen() || session.phase() != GamePhase.PLAYING) {
-            return;
-        }
-        if ("?".equals(character)) {
-            showHelp = !showHelp;
-            refresh();
-            return;
-        }
-        if (pending == ItemAction.NONE) {
-            submit(InputMapper.fromTyped(character));
-        }
     }
 
     private void submit(Command command) {

@@ -68,6 +68,7 @@ public class GameSession {
     private final Identification identification;
     private final QuestLog quests = new QuestLog();
     private final Difficulty difficulty;
+    private final ActionRules actionRules;
     private final RunStats stats = new RunStats();
     private final List<String> recording = new ArrayList<>();
     private final AchievementTracker achievements = new AchievementTracker();
@@ -101,9 +102,24 @@ public class GameSession {
      * @param difficulty how hard the run is
      */
     public GameSession(long seed, FloorSource floorSource, String playerName, Difficulty difficulty) {
+        this(seed, floorSource, playerName, difficulty, ActionRules.CURRENT);
+    }
+
+    /**
+     * Starts a run with the action rules associated with a saved record.
+     *
+     * @param seed the run seed
+     * @param floorSource supplies each floor on first visit
+     * @param playerName the adventurer's name
+     * @param difficulty how hard the run is
+     * @param actionRules which rules govern turns and descent
+     */
+    public GameSession(long seed, FloorSource floorSource, String playerName, Difficulty difficulty,
+                       ActionRules actionRules) {
         this.seed = seed;
         this.difficulty = Objects.requireNonNull(difficulty, "difficulty");
         this.floorSource = Objects.requireNonNull(floorSource, "floorSource");
+        this.actionRules = Objects.requireNonNull(actionRules, "actionRules");
         this.identification = new Identification(rng(RandomStream.IDENTIFY));
         this.floor = obtainFloor(GameRules.HUB_DEPTH);
         this.player = new Player(playerName, floor.entrance());
@@ -136,10 +152,10 @@ public class GameSession {
         }
         recording.add(command.encode());
         CommandResult result;
-        if (player.effects().has(EffectType.STUNNED)) {
-            result = CommandResult.acted(player.actionCost(), "You are stunned and cannot act!");
-        } else {
+        if (ActionRules.canAct(player)) {
             result = command.execute(this);
+        } else {
+            result = CommandResult.acted(player.actionCost(), "You are stunned and cannot act!");
         }
         if (result.message() != null) {
             message(result.message());
@@ -504,6 +520,11 @@ public class GameSession {
             }
         }
         return null;
+    }
+
+    /** @return the action rules for this run */
+    public ActionRules actionRules() {
+        return actionRules;
     }
 
     /** @return the Atrium shop, stocked on first use */

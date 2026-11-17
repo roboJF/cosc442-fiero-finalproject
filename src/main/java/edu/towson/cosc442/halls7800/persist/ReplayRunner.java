@@ -37,7 +37,8 @@ public final class ReplayRunner {
      * @throws IllegalArgumentException if an action in the replayed portion is invalid
      */
     public static GameSession replay(RunRecord record, int steps) {
-        GameSession session = GameFactory.newGame(record.seed(), record.playerName(), record.difficulty());
+        GameSession session = GameFactory.newGame(record.seed(), record.playerName(), record.difficulty(),
+                record.actionRules());
         int limit = Math.min(steps, record.actions().size());
         for (int i = 0; i < limit; i++) {
             String token = record.actions().get(i);

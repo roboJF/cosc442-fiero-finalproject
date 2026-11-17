@@ -1,7 +1,7 @@
 package edu.towson.cosc442.halls7800.entity;
 
 import edu.towson.cosc442.halls7800.combat.Combat;
-import edu.towson.cosc442.halls7800.effect.EffectType;
+import edu.towson.cosc442.halls7800.engine.ActionRules;
 import edu.towson.cosc442.halls7800.engine.GameSession;
 import edu.towson.cosc442.halls7800.world.Direction;
 import edu.towson.cosc442.halls7800.world.Floor;
@@ -40,6 +40,7 @@ public final class CompanionAi {
      */
     public static int takeTurn(Companion doc, GameSession session) {
         int cost = doc.actionCost();
+        boolean eligibleAtStart = ActionRules.canAct(doc);
         Floor floor = session.floor();
         doc.syncLevel(session.player().level());
         session.reportEffects(doc, doc.effects().tick(doc, floor.terrainAt(doc.position())));
@@ -48,7 +49,7 @@ public final class CompanionAi {
             return cost;
         }
         doc.regenerate();
-        if (doc.effects().has(EffectType.STUNNED)) {
+        if (!session.actionRules().canActAfterEffects(doc, eligibleAtStart)) {
             return cost;
         }
         Monster adjacent = adjacentEnemy(doc, session);

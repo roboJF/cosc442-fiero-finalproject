@@ -1,5 +1,6 @@
 package edu.towson.cosc442.halls7800.gen;
 
+import edu.towson.cosc442.halls7800.engine.ActionRules;
 import edu.towson.cosc442.halls7800.engine.Difficulty;
 import edu.towson.cosc442.halls7800.engine.GameSession;
 
@@ -34,7 +35,20 @@ public final class GameFactory {
      * @return a new session, positioned in the Atrium
      */
     public static GameSession newGame(long seed, String playerName, Difficulty difficulty) {
-        return new GameSession(seed, new ProceduralFloorSource(seed, difficulty), playerName, difficulty);
+        return newGame(seed, playerName, difficulty, ActionRules.CURRENT);
+    }
+
+    /**
+     * Recreates the start of a run under the rules recorded when it was played.
+     *
+     * @param seed the run seed
+     * @param playerName the adventurer's name
+     * @param difficulty how hard the run is
+     * @param rules which rules govern turns and descent
+     * @return a new session, positioned in the Atrium
+     */
+    public static GameSession newGame(long seed, String playerName, Difficulty difficulty, ActionRules rules) {
+        return new GameSession(seed, new ProceduralFloorSource(seed, difficulty), playerName, difficulty, rules);
     }
 
     /**

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.towson.cosc442.halls7800.effect.EffectType;
+import edu.towson.cosc442.halls7800.engine.ActionRules;
 import edu.towson.cosc442.halls7800.engine.Difficulty;
 import edu.towson.cosc442.halls7800.engine.DropCommand;
 import edu.towson.cosc442.halls7800.engine.GameSession;
@@ -40,6 +41,8 @@ class ReplayRunnerTest {
         RunRecord saved = RunRecord.parse(RunRecord.of(original).toText());
         GameSession restored = ReplayRunner.replay(saved);
 
+        assertEquals(RunRecord.VERSION, saved.version());
+        assertEquals(ActionRules.CURRENT, restored.actionRules());
         assertEquals(original.turn(), restored.turn());
         assertEquals(original.player().position(), restored.player().position());
         assertEquals(original.render(), restored.render());
@@ -120,6 +123,12 @@ class ReplayRunnerTest {
         assertEquals(3, restored.turn());
         assertEquals(new Position(27, 13), restored.player().position());
         assertEquals(record.actions(), restored.recording());
+        assertEquals(ActionRules.LEGACY, restored.actionRules());
+
+        assertTrue(restored.submit(new WaitCommand()).performed());
+        RunRecord savedAgain = RunRecord.parse(RunRecord.of(restored).toText());
+        assertEquals(1, savedAgain.version());
+        assertEquals(restored.turn(), ReplayRunner.replay(savedAgain).turn());
     }
 
     @ParameterizedTest

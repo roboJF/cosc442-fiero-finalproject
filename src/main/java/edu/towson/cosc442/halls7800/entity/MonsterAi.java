@@ -2,6 +2,7 @@ package edu.towson.cosc442.halls7800.entity;
 
 import edu.towson.cosc442.halls7800.combat.Combat;
 import edu.towson.cosc442.halls7800.effect.EffectType;
+import edu.towson.cosc442.halls7800.engine.ActionRules;
 import edu.towson.cosc442.halls7800.engine.GameEvent;
 import edu.towson.cosc442.halls7800.engine.GameSession;
 import edu.towson.cosc442.halls7800.util.RandomStream;
@@ -62,6 +63,7 @@ public final class MonsterAi {
      */
     public static int takeTurn(Monster monster, GameSession session) {
         int cost = monster.actionCost();
+        boolean eligibleAtStart = ActionRules.canAct(monster);
         Rng rng = session.rng(RandomStream.AI);
         Floor floor = session.floor();
 
@@ -77,10 +79,11 @@ public final class MonsterAi {
         if (monster.type().has(MonsterTrait.STATIONARY)) {
             return cost;
         }
-        if (monster.isBoss()) {
+        boolean canAct = session.actionRules().canActAfterEffects(monster, eligibleAtStart);
+        if (monster.isBoss() && (canAct || session.actionRules() == ActionRules.LEGACY)) {
             BossAi.checkPhases(monster, session);
         }
-        if (monster.effects().has(EffectType.STUNNED)) {
+        if (!canAct) {
             return cost;
         }
 

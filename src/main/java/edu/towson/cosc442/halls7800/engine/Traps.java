@@ -72,8 +72,14 @@ public final class Traps {
             case TRAPDOOR -> {
                 int damage = player.takeDamage(3);
                 if (player.isAlive() && depth < session.deepestDepth() - 1) {
-                    session.message("The floor gives way beneath you! You fall, taking " + damage + " damage.");
-                    session.changeFloor(depth + 1);
+                    Monster guardian = session.actionRules() == ActionRules.LEGACY ? null : session.livingBoss();
+                    if (guardian == null) {
+                        session.message("The floor gives way beneath you! You fall, taking " + damage + " damage.");
+                        session.changeFloor(depth + 1);
+                    } else {
+                        session.message("A shimmering seal blocks the trapdoor. " + guardian.subject()
+                                + " must be defeated first. You take " + damage + " damage.");
+                    }
                 } else {
                     session.message("A trapdoor creaks open beneath you, but it is jammed. You take " + damage + " damage.");
                 }

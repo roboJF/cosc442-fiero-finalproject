@@ -62,9 +62,10 @@ The game keeps its files in `~/.halls7800` (on Windows, `C:\Users\<you>\.halls78
 | `last-run.txt` | the complete record of the most recently finished run |
 | `scores.txt`, `achievements.txt`, `lifetime-stats.txt` | high scores, achievements and lifetime totals |
 
-If a save fails, the game stays open so you can fix the save location and retry. Version 1 records
-remain readable. If an older build omitted a stunned turn, the file lacks the input needed to
-reconstruct that turn and the run may resume from a different state.
+If a save fails, the game stays open so you can fix the save location and retry. New runs use
+version 2 records with the updated stun and guardian rules. Continued version 1 runs retain
+their original rules and record version. If an older build omitted a stunned turn, the file
+lacks the input needed to reconstruct that turn and the run may resume from a different state.
 
 A run record is plain text: the seed, difficulty, name, and every action taken. To replay one
 without opening the game window:

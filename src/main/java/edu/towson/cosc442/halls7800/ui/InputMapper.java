@@ -2,6 +2,8 @@ package edu.towson.cosc442.halls7800.ui;
 
 import edu.towson.cosc442.halls7800.engine.CloseDoorCommand;
 import edu.towson.cosc442.halls7800.engine.Command;
+import edu.towson.cosc442.halls7800.engine.GamePhase;
+import edu.towson.cosc442.halls7800.engine.GameSession;
 import edu.towson.cosc442.halls7800.engine.MoveCommand;
 import edu.towson.cosc442.halls7800.engine.PickUpCommand;
 import edu.towson.cosc442.halls7800.engine.SearchCommand;
@@ -14,6 +16,10 @@ import javafx.scene.input.KeyCode;
  * Translates keyboard input into game commands.
  */
 final class InputMapper {
+
+    enum Mode {
+        FINISHED, SHOP, PERK, EXAMINE, ITEM, PLAY
+    }
 
     /** Help text listing the controls, shown in the side panel. */
     static final String CONTROLS = String.join("\n",
@@ -41,6 +47,23 @@ final class InputMapper {
             "Close / cancel  Esc              Save and quit to title   Esc");
 
     private InputMapper() {
+    }
+
+    /** Resolves which part of the game screen handles input. */
+    static Mode mode(GameSession session, boolean examining, boolean choosingItem) {
+        if (session.phase() != GamePhase.PLAYING) {
+            return Mode.FINISHED;
+        }
+        if (session.isShopOpen()) {
+            return Mode.SHOP;
+        }
+        if (!session.player().perkChoices().isEmpty()) {
+            return Mode.PERK;
+        }
+        if (examining) {
+            return Mode.EXAMINE;
+        }
+        return choosingItem ? Mode.ITEM : Mode.PLAY;
     }
 
     /**
@@ -80,16 +103,16 @@ final class InputMapper {
     }
 
     /**
-     * Maps a typed character to a command. Used for symbols such as {@code >} whose key code
-     * differs between keyboard layouts.
+     * Maps a typed shortcut to its pressed-key equivalent so both use the same input mode.
      *
      * @param character the typed text
-     * @return the command, or {@code null} if the character has no action
+     * @return the equivalent key, or {@code null} if the character is not a shortcut
      */
-    static Command fromTyped(String character) {
+    static KeyCode keyForTypedShortcut(String character) {
         return switch (character) {
-            case ">" -> StairsCommand.descend();
-            case "<" -> StairsCommand.ascend();
+            case ">" -> KeyCode.PAGE_DOWN;
+            case "<" -> KeyCode.PAGE_UP;
+            case "?" -> KeyCode.F1;
             default -> null;
         };
     }

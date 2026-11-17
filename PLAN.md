@@ -9,12 +9,12 @@ Continue rebuilds the game from the seed and action log. The log now includes in
 - Regression tests cover a snare save, changes on a revisited floor, invalid actions, a version 1 save, and both exit handlers with an unwritable save location.
 - Version 1 records remain readable. Turns omitted by earlier builds cannot be recovered from the action log. [Save and replay notes](README.md#seeds-saves-and-replays)
 
-## 2. Refactor action rules shared by the engine and UI
+## 2. Refactor action rules shared by the engine and UI (Completed)
 
-Rules depend on which path handles an action. A one-turn stun expires before monster AI checks it, and a headless probe confirmed the monster could move. The typed stair shortcuts bypass examine and perk-selection checks. Stairs enforce the guardian rule, and trapdoors skip that check. [MonsterAi] · [GameView] · [GameSession] · [Traps]
+New runs decide whether a creature can act before its stun timer ticks. Typed and pressed shortcuts pass through the same input modes. Stairs and trapdoors both check for a living guardian before descent. [MonsterAi] · [GameView] · [GameSession] · [Traps]
 
-- Extract turn eligibility from scheduling and effect updates. Test one-turn stuns for players, monsters, and the companion, including the order of effect expiry and actions.
-- Route typed and pressed keys through the same mode checks. Share guardian eligibility between stairs and trapdoors. Verify the seed 4 Hydra case, normal descent, and keyboard shortcuts during examine and perk selection.
+- Regression tests cover one-turn stuns, effect expiry, boss phase changes, and the seed 4 Hydra encounter. A JavaFX smoke test confirmed that typed `>` and Page Down are blocked during examine and perk selection, and that typed stairs work in normal play.
+- New runs use version 2 records. Version 1 runs keep the original stun and trapdoor rules when replayed, continued, and saved again. [Save and replay notes](README.md#seeds-saves-and-replays)
 
 ## 3. Expand regression coverage across systems
 

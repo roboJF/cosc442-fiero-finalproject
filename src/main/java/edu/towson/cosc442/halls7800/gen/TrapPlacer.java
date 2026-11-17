@@ -15,7 +15,8 @@ import java.util.List;
 /**
  * Hides traps on a generated floor: on plain floor tiles in corridors and ordinary rooms, never in
  * the entrance room or within {@link #SAFE_RADIUS} tiles of the arrival point, and never on
- * stairs. Trapdoors never appear on boss floors or the floor above the Sanctum.
+ * stairs. Trapdoors are excluded when the next floor has a guardian and on the floor above
+ * the Sanctum. The engine decides whether the player can fall through a trapdoor.
  */
 public class TrapPlacer {
 
