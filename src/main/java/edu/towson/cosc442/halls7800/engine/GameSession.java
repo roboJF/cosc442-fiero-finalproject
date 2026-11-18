@@ -112,7 +112,7 @@ public class GameSession {
      * @param floorSource supplies each floor on first visit
      * @param playerName the adventurer's name
      * @param difficulty how hard the run is
-     * @param actionRules which rules govern turns and descent
+     * @param actionRules which gameplay rules govern the run
      */
     public GameSession(long seed, FloorSource floorSource, String playerName, Difficulty difficulty,
                        ActionRules actionRules) {
@@ -530,7 +530,8 @@ public class GameSession {
     /** @return the Atrium shop, stocked on first use */
     public Shop shop() {
         if (shop == null) {
-            shop = new Shop(itemGenerator, SeedDeriver.rngFor(seed, SeedDeriver.RUN_WIDE, RandomStream.SHOP));
+            shop = new Shop(itemGenerator, SeedDeriver.rngFor(seed, SeedDeriver.RUN_WIDE, RandomStream.SHOP),
+                    actionRules);
         }
         return shop;
     }

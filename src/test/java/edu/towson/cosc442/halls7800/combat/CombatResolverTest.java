@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.towson.cosc442.halls7800.effect.EffectType;
+import edu.towson.cosc442.halls7800.engine.ActionRules;
 import edu.towson.cosc442.halls7800.entity.Monster;
 import edu.towson.cosc442.halls7800.entity.MonsterType;
 import edu.towson.cosc442.halls7800.entity.Player;
@@ -95,5 +96,52 @@ class CombatResolverTest {
         assertEquals(goblin.maxHp() - 2, goblin.hp());
         assertEquals(EffectType.BURNING, result.inflicted());
         assertTrue(goblin.effects().has(EffectType.BURNING));
+    }
+
+    @Test
+    void fullyAbsorbedBiteDoesNotPoisonThePlayer() {
+        player.applyEffect(EffectType.SHIELDED, 3, 4);
+        Monster centipede = new Monster(MonsterType.LINKED_LIST_CENTIPEDE, new Position(2, 1), false);
+        ScriptedRng rng = new ScriptedRng(0, 99, 2, 0);
+
+        AttackResult result = CombatResolver.resolve(centipede, player, centipede.meleeAttack(), rng);
+
+        assertTrue(result.hit());
+        assertEquals(4, result.absorbed());
+        assertEquals(0, result.damage());
+        assertEquals(player.maxHp(), player.hp());
+        assertNull(result.inflicted());
+        assertFalse(player.effects().has(EffectType.POISONED));
+        assertEquals(1, rng.remaining());
+    }
+
+    @Test
+    void partiallyAbsorbedBiteCanStillPoisonThePlayer() {
+        player.applyEffect(EffectType.SHIELDED, 3, 3);
+        Monster centipede = new Monster(MonsterType.LINKED_LIST_CENTIPEDE, new Position(2, 1), false);
+
+        AttackResult result = CombatResolver.resolve(centipede, player, centipede.meleeAttack(),
+                new ScriptedRng(0, 99, 2, 0));
+
+        assertEquals(3, result.absorbed());
+        assertEquals(1, result.damage());
+        assertEquals(player.maxHp() - 1, player.hp());
+        assertEquals(EffectType.POISONED, result.inflicted());
+        assertTrue(player.effects().has(EffectType.POISONED));
+    }
+
+    @Test
+    void versionTwoPreservesPoisonAndTheCombatRollOnFullyAbsorbedBites() {
+        player.applyEffect(EffectType.SHIELDED, 3, 4);
+        Monster centipede = new Monster(MonsterType.LINKED_LIST_CENTIPEDE, new Position(2, 1), false);
+        ScriptedRng rng = new ScriptedRng(0, 99, 2, 0);
+
+        AttackResult result = CombatResolver.resolve(centipede, player, centipede.meleeAttack(), rng,
+                ActionRules.VERSION_2);
+
+        assertEquals(0, result.damage());
+        assertEquals(EffectType.POISONED, result.inflicted());
+        assertTrue(player.effects().has(EffectType.POISONED));
+        assertEquals(0, rng.remaining());
     }
 }

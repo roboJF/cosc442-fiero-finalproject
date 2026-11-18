@@ -14,14 +14,14 @@ Continue rebuilds the game from the seed and action log. The log now includes in
 New runs decide whether a creature can act before its stun timer ticks. Typed and pressed shortcuts pass through the same input modes. Stairs and trapdoors both check for a living guardian before descent. [MonsterAi] · [GameView] · [GameSession] · [Traps]
 
 - Regression tests cover one-turn stuns, effect expiry, boss phase changes, and the seed 4 Hydra encounter. A JavaFX smoke test confirmed that typed `>` and Page Down are blocked during examine and perk selection, and that typed stairs work in normal play.
-- New runs use version 2 records. Version 1 runs keep the original stun and trapdoor rules when replayed, continued, and saved again. [Save and replay notes](README.md#seeds-saves-and-replays)
+- Version 2 introduced the updated stun and guardian rules. Version 1 runs keep the original stun and trapdoor rules when replayed, continued, and saved again. [Save and replay notes](README.md#seeds-saves-and-replays)
 
 ## 3. Expand regression coverage across systems (Completed)
 
 The suite grew from 43 to 62 test cases. The new tests use fixed maps and scripted combat rolls, and check that stairs, guardians, requirements pages, and vault keys stay reachable across 432 generated floors. Direct fallback tests cover connectivity, borders, optional stairs, and progression. The fallback layouts still fall below the usual open-tile minimum. [Quality baseline](BASELINE.md#test-coverage) · [DungeonGenerator]
 
 - GitHub Actions enables the JavaFX smoke test under Xvfb. It checks that a player can start a run, save to a temporary directory, continue from the title screen, and save again with both actions recorded. [Quality workflow](.github/workflows/quality.yml)
-- JaCoCo line coverage rose from 46.53% to 57.99% and branch coverage rose from 37.74% to 46.43% with the smoke test enabled. Headless coverage reached 47.88% of lines and 40.66% of branches. CI now enforces project-wide minimums of 45% line and 38% branch coverage, with room for both build modes.
+- JaCoCo line coverage rose from 46.53% to 57.99% and branch coverage rose from 37.74% to 46.43% with the smoke test enabled. Headless coverage reached 47.88% of lines and 40.66% of branches. This work raised the CI minimums to 45% line and 38% branch coverage.
 - Across the classes below, PIT killed 104 of 219 mutants, up from 55. Mutants without coverage fell from 87 to 61. The JavaFX smoke test contributes to JaCoCo coverage and runs outside PIT.
 
 | Class | JaCoCo branches covered | PIT survivors |
@@ -33,12 +33,13 @@ The suite grew from 43 to 62 test cases. The new tests use fixed maps and script
 | `ResidentPlacer` | 18/28 → 21/28 | 13 → 12 |
 | `HallsApp` | 7/30 → 16/30 | 1 → 1 |
 
-## 4. Fix the gameplay rules that cost players progress
+## 4. Fix the gameplay rules that cost players progress (Completed)
 
-Failed purchases can consume gold, stacked pages can block the Archivist quest, and a fully absorbed hit can still poison the player. Each failure penalizes a valid player choice. [Beta reports](BUGS.md)
+Conover charges for an item after the pack accepts it. A stack can still accept matching items when every slot is occupied. The Archivist counts the pages in a stack and grants the reward once. On-hit effects require damage to get through the shield. [Beta reports](BUGS.md)
 
-- Charge gold and remove stock only after the pack accepts the item. Test rejected armor and a potion that merges into a full pack.
-- Count page quantities for quest progress and verify the reward is granted once. Check poison against damage after shielding and test both full and partial absorption.
+- Regression tests cover rejected armor and unfamiliar potions, a potion purchase that merges into a full pack, stacked pages and repeat turn-in, and poison on fully and partially absorbed hits.
+- New runs use version 3 records. Version 1 and 2 records keep their original gameplay rules and combat roll sequence when replayed or continued. [Save and replay notes](README.md#seeds-saves-and-replays)
+- JaCoCo reached 60.07% line and 48.24% branch coverage with the smoke test enabled. Headless coverage reached 50.08% line and 42.52% branch. CI now requires 47% line and 40% branch coverage.
 
 ## 5. Give the engine control of mutable game state
 

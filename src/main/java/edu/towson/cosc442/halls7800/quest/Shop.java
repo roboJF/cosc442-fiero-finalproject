@@ -1,5 +1,6 @@
 package edu.towson.cosc442.halls7800.quest;
 
+import edu.towson.cosc442.halls7800.engine.ActionRules;
 import edu.towson.cosc442.halls7800.entity.Player;
 import edu.towson.cosc442.halls7800.item.EquippableItem;
 import edu.towson.cosc442.halls7800.item.Food;
@@ -15,6 +16,7 @@ import edu.towson.cosc442.halls7800.util.Rng;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Conover's Curio &amp; Circuit, the Atrium shop. Items are sold at
@@ -29,7 +31,10 @@ public class Shop {
     /** Price paid to the player, as a percentage of item value. */
     public static final int SELL_PERCENT = 50;
 
+    private static final String PACK_FULL = "\"Your pack's full. Even I can't fit more in there.\"";
+
     private final List<Item> stock = new ArrayList<>();
+    private final ActionRules actionRules;
 
     /**
      * Stocks the shop for a new run.
@@ -38,6 +43,18 @@ public class Shop {
      * @param rng randomness source (the run's shop stream)
      */
     public Shop(ItemGenerator generator, Rng rng) {
+        this(generator, rng, ActionRules.CURRENT);
+    }
+
+    /**
+     * Stocks the shop using the purchase rules associated with the run.
+     *
+     * @param generator item generator
+     * @param rng randomness source (the run's shop stream)
+     * @param actionRules purchase rules for this run
+     */
+    public Shop(ItemGenerator generator, Rng rng, ActionRules actionRules) {
+        this.actionRules = Objects.requireNonNull(actionRules, "actionRules");
         stock.add(new Potion(Potion.Kind.HEALING, 1));
         stock.add(new Potion(Potion.Kind.HEALING, 1));
         stock.add(new Potion(Potion.Kind.SHIELDING, 1));
@@ -99,11 +116,15 @@ public class Shop {
         if (player.gold() < price) {
             return "\"That's " + price + " gold. Come back when the purse is heavier.\"";
         }
+        boolean addBeforeCharging = actionRules.usesProgressFixes();
+        if (addBeforeCharging && !player.inventory().add(item)) {
+            return PACK_FULL;
+        }
         player.spendGold(price);
         stock.remove(index);
         id.identify(item);
-        if (!player.inventory().add(item)) {
-            return "\"Your pack's full. Even I can't fit more in there.\"";
+        if (!addBeforeCharging && !player.inventory().add(item)) {
+            return PACK_FULL;
         }
         return "You buy " + item.describe(id) + " for " + price + " gold.";
     }

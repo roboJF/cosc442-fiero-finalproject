@@ -2,6 +2,7 @@ package edu.towson.cosc442.halls7800.combat;
 
 import edu.towson.cosc442.halls7800.effect.EffectManager;
 import edu.towson.cosc442.halls7800.effect.EffectType;
+import edu.towson.cosc442.halls7800.engine.ActionRules;
 import edu.towson.cosc442.halls7800.entity.Creature;
 import edu.towson.cosc442.halls7800.util.Rng;
 
@@ -56,6 +57,21 @@ public final class CombatResolver {
      * @return what happened
      */
     public static AttackResult resolve(Creature attacker, Creature defender, AttackProfile attack, Rng rng) {
+        return resolve(attacker, defender, attack, rng, ActionRules.CURRENT);
+    }
+
+    /**
+     * Resolves one attack using the rules associated with the run.
+     *
+     * @param attacker the attacking creature
+     * @param defender the defending creature
+     * @param attack the attack being made
+     * @param rng randomness source (the combat stream during play)
+     * @param rules the run's on-hit effect rules
+     * @return what happened
+     */
+    public static AttackResult resolve(Creature attacker, Creature defender, AttackProfile attack, Rng rng,
+                                       ActionRules rules) {
         boolean helpless = defender.isHelpless();
         int accuracy = attack.accuracy() + attacker.effects().accuracyModifier();
         if (!helpless && rng.nextInt(100) >= hitChance(accuracy, defender.evasion())) {
@@ -81,7 +97,8 @@ public final class CombatResolver {
         int dealt = defender.takeDamage(afterShield);
 
         EffectType inflicted = null;
-        if (damage > 0 && defender.isAlive() && attack.onHitEffect() != null
+        int effectDamage = rules.usesProgressFixes() ? dealt : damage;
+        if (effectDamage > 0 && defender.isAlive() && attack.onHitEffect() != null
                 && rng.nextInt(100) < attack.onHitPercent()) {
             EffectManager.Outcome outcome = defender.applyEffect(attack.onHitEffect(),
                     attack.effectDuration(), attack.effectMagnitude());

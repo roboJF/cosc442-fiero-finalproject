@@ -49,7 +49,8 @@ public final class Combat {
      */
     public static AttackResult attackWith(GameSession session, Creature attacker, Creature defender,
                                           AttackProfile profile, boolean ranged) {
-        AttackResult result = CombatResolver.resolve(attacker, defender, profile, session.rng(RandomStream.COMBAT));
+        AttackResult result = CombatResolver.resolve(attacker, defender, profile, session.rng(RandomStream.COMBAT),
+                session.actionRules());
         report(session, attacker, defender, profile, result, ranged);
         if (defender.isPlayer() && result.hit()) {
             session.signal(GameEvent.Type.PLAYER_HURT, defender.position());

@@ -13,7 +13,7 @@ import java.util.Objects;
  *
  * <p>Text format (one item per line):
  * <pre>
- * HALLS7800-RUN 2
+ * HALLS7800-RUN 3
  * seed=12345
  * difficulty=UNDERGRADUATE
  * name=Ada
@@ -33,14 +33,13 @@ public record RunRecord(long seed, Difficulty difficulty, String playerName, Lis
     /** First line of every record file. */
     public static final String HEADER = "HALLS7800-RUN";
     /** Version used for new runs. */
-    public static final int VERSION = 2;
-    private static final int LEGACY_VERSION = 1;
+    public static final int VERSION = ActionRules.CURRENT.recordVersion();
 
     /**
      * Validates and copies the fields.
      */
     public RunRecord {
-        validateVersion(version);
+        ActionRules.forRecordVersion(version);
         Objects.requireNonNull(difficulty, "difficulty");
         Objects.requireNonNull(playerName, "playerName");
         actions = List.copyOf(actions);
@@ -58,7 +57,7 @@ public record RunRecord(long seed, Difficulty difficulty, String playerName, Lis
      * @return its record
      */
     public static RunRecord of(GameSession session) {
-        int version = session.actionRules() == ActionRules.LEGACY ? LEGACY_VERSION : VERSION;
+        int version = session.actionRules().recordVersion();
         return new RunRecord(session.seed(), session.difficulty(), session.player().name(), session.recording(), version);
     }
 
@@ -88,7 +87,6 @@ public record RunRecord(long seed, Difficulty difficulty, String playerName, Lis
             throw new IllegalArgumentException("Not a Halls of 7800 run record");
         }
         int version = Integer.parseInt(lines[0].substring(HEADER.length() + 1).trim());
-        validateVersion(version);
         long seed = Long.parseLong(value(lines[1], "seed"));
         Difficulty difficulty = Difficulty.valueOf(value(lines[2], "difficulty"));
         String name = value(lines[3], "name");
@@ -102,13 +100,7 @@ public record RunRecord(long seed, Difficulty difficulty, String playerName, Lis
     }
 
     ActionRules actionRules() {
-        return version == LEGACY_VERSION ? ActionRules.LEGACY : ActionRules.CURRENT;
-    }
-
-    private static void validateVersion(int version) {
-        if (version != LEGACY_VERSION && version != VERSION) {
-            throw new IllegalArgumentException("Unsupported run record version " + version);
-        }
+        return ActionRules.forRecordVersion(version);
     }
 
     private static String value(String line, String key) {

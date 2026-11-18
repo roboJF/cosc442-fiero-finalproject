@@ -131,6 +131,30 @@ class ReplayRunnerTest {
         assertEquals(restored.turn(), ReplayRunner.replay(savedAgain).turn());
     }
 
+    @Test
+    void continuedVersionTwoRecordKeepsItsVersionAndRules() {
+        RunRecord record = RunRecord.parse("""
+                HALLS7800-RUN 2
+                seed=62
+                difficulty=FRESHMAN
+                name=Ada
+                M:NORTH_EAST
+                W
+                """);
+
+        GameSession continued = ReplayRunner.replay(record);
+
+        assertEquals(ActionRules.VERSION_2, continued.actionRules());
+        assertEquals(new Position(27, 13), continued.player().position());
+        assertEquals(2, continued.turn());
+
+        assertTrue(continued.submit(new WaitCommand()).performed());
+        RunRecord savedAgain = RunRecord.parse(RunRecord.of(continued).toText());
+        assertEquals(2, savedAgain.version());
+        assertEquals(List.of("M:NORTH_EAST", "W", "W"), savedAgain.actions());
+        assertEquals(continued.turn(), ReplayRunner.replay(savedAgain).turn());
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"S:TYPO", "S", "SHOP:OPEN", "SHOP", "W:extra", "F:", "G:extra",
             "X", "M:TYPO", "BUY:", "SELL:words", "U:2147483648", "PERK:TYPO", "UNKNOWN"})

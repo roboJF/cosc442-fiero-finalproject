@@ -67,8 +67,9 @@ public class QuestLog {
      */
     public void update(GameSession session) {
         Inventory pack = session.player().inventory();
-        get(Quest.Id.DIPLOMA).setProgress(countQuestItems(pack, QuestItem.Kind.DIPLOMA));
-        get(Quest.Id.LOST_REQUIREMENTS).setProgress(countQuestItems(pack, QuestItem.Kind.REQUIREMENTS_PAGE));
+        boolean countStacks = !session.actionRules().usesProgressFixes();
+        get(Quest.Id.DIPLOMA).setProgress(countQuestItems(pack, QuestItem.Kind.DIPLOMA, countStacks));
+        get(Quest.Id.LOST_REQUIREMENTS).setProgress(countQuestItems(pack, QuestItem.Kind.REQUIREMENTS_PAGE, countStacks));
         get(Quest.Id.MUTATION_TRIAL).setProgress(mutantsKilled);
         get(Quest.Id.CARTOGRAPHY).setProgress(exploredFloors(session));
         get(Quest.Id.SECURE_VAULTS).setProgress(vaultsUnlocked);
@@ -81,9 +82,14 @@ public class QuestLog {
      * @return how many of that item the pack holds
      */
     public static int countQuestItems(Inventory pack, QuestItem.Kind kind) {
-        return (int) pack.ofType(QuestItem.class).stream()
+        return countQuestItems(pack, kind, false);
+    }
+
+    private static int countQuestItems(Inventory pack, QuestItem.Kind kind, boolean countStacks) {
+        return pack.ofType(QuestItem.class).stream()
                 .filter(q -> q.kind() == kind)
-                .count();
+                .mapToInt(q -> countStacks ? 1 : q.quantity())
+                .sum();
     }
 
     /**

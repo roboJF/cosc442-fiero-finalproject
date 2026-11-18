@@ -44,7 +44,7 @@ public final class GameFactory {
      * @param seed the run seed
      * @param playerName the adventurer's name
      * @param difficulty how hard the run is
-     * @param rules which rules govern turns and descent
+     * @param rules which gameplay rules govern the run
      * @return a new session, positioned in the Atrium
      */
     public static GameSession newGame(long seed, String playerName, Difficulty difficulty, ActionRules rules) {
