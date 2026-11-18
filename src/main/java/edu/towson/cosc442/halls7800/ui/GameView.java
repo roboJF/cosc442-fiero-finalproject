@@ -52,7 +52,7 @@ import javafx.scene.text.FontWeight;
  * at the bottom. All game logic lives in {@link GameSession}; this class only draws it and
  * forwards key presses as commands.
  */
-public class GameView extends BorderPane implements Screen {
+public final class GameView extends BorderPane implements Screen {
 
     /** Receives the player's requests to leave the game screen. */
     public interface Listener {
@@ -344,7 +344,7 @@ public class GameView extends BorderPane implements Screen {
         } else {
             promptLabel.setText(pending == ItemAction.NONE ? "" : pending.prompt + " (letter, Esc to cancel)");
         }
-        List<MessageLog.Entry> recent = session.messages().recent(LOG_LINES);
+        List<MessageLog.Entry> recent = session.recentMessages(LOG_LINES);
         for (int i = 0; i < LOG_LINES; i++) {
             int index = i - (LOG_LINES - recent.size());
             logLines.get(i).setText(index >= 0 ? recent.get(index).display() : "");

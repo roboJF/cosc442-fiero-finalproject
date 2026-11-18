@@ -24,7 +24,7 @@ import java.util.Objects;
  * Tinkerer knows exactly what everything is, so wares are listed by their true names and buying
  * one identifies its kind.
  */
-public class Shop {
+public final class Shop {
 
     /** Price paid by the player, as a percentage of item value. */
     public static final int BUY_PERCENT = 150;

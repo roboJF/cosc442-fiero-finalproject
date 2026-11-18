@@ -98,7 +98,7 @@ public final class ReplayTool {
         }
         out.println();
         out.println("Last messages:");
-        List<MessageLog.Entry> recent = session.messages().recent(logLines);
+        List<MessageLog.Entry> recent = session.recentMessages(logLines);
         for (MessageLog.Entry e : recent) {
             out.println("  [turn " + e.turn() + "] " + e.display());
         }

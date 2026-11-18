@@ -5,7 +5,7 @@ import java.util.Objects;
 /**
  * Body armor. Heavier armor protects more but makes the wearer easier to hit.
  */
-public class Armor extends EquippableItem {
+public final class Armor extends EquippableItem {
 
     /**
      * Armor kinds. Columns: name, armor rating, evasion penalty, shallowest depth found, spawn

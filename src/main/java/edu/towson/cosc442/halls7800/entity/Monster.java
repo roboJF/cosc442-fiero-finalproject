@@ -10,7 +10,7 @@ import java.util.Objects;
  * A hostile creature. Its statistics come from its {@link MonsterType}; its decisions come from
  * {@link MonsterAi}, which is driven by the monster's current {@link State}.
  */
-public class Monster extends Creature {
+public final class Monster extends Creature {
 
     /** What the monster is currently doing. */
     public enum State {

@@ -9,6 +9,7 @@ import edu.towson.cosc442.halls7800.effect.EffectType;
 import edu.towson.cosc442.halls7800.engine.ActionRules;
 import edu.towson.cosc442.halls7800.engine.Difficulty;
 import edu.towson.cosc442.halls7800.engine.DropCommand;
+import edu.towson.cosc442.halls7800.engine.GameRules;
 import edu.towson.cosc442.halls7800.engine.GameSession;
 import edu.towson.cosc442.halls7800.engine.MoveCommand;
 import edu.towson.cosc442.halls7800.engine.SearchCommand;
@@ -69,7 +70,8 @@ class ReplayRunnerTest {
         assertEquals(original.player().hp(), restored.player().hp());
         assertFalse(restored.player().effects().has(EffectType.STUNNED));
         assertEquals(original.recording(), restored.recording());
-        assertEquals(original.messages().all(), restored.messages().all());
+        assertEquals(original.recentMessages(GameRules.MESSAGE_LOG_CAPACITY),
+                restored.recentMessages(GameRules.MESSAGE_LOG_CAPACITY));
         assertEquals(original.monsters().size(), restored.monsters().size());
         for (int i = 0; i < original.monsters().size(); i++) {
             var expected = original.monsters().get(i);

@@ -9,7 +9,7 @@ import java.util.List;
  * A bounded history of messages shown to the player. When full, the oldest message is dropped.
  * Repeating the same message on the same turn increments a counter instead of adding a line.
  */
-public class MessageLog {
+public final class MessageLog {
 
     /**
      * One line of the log.

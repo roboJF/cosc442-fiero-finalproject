@@ -125,7 +125,7 @@
             <id>quality</id>
             <properties>
                 <!-- Keep the minimums below the headless results recorded in PLAN.md. -->
-                <quality.coverage.line.minimum>47%</quality.coverage.line.minimum>
+                <quality.coverage.line.minimum>47.1%</quality.coverage.line.minimum>
                 <quality.coverage.branch.minimum>40%</quality.coverage.branch.minimum>
             </properties>
             <build>

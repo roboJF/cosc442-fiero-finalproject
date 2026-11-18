@@ -7,7 +7,7 @@ import java.util.Objects;
  * Stackable missiles thrown at a distant target. A thrown missile lands where it hits or stops and
  * can be picked up again.
  */
-public class ThrownWeapon extends Item {
+public final class ThrownWeapon extends Item {
 
     /** Maximum throwing distance in tiles. */
     public static final int RANGE = 7;

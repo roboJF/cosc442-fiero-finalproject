@@ -13,7 +13,7 @@ import java.util.TreeSet;
  * <p>Rooms are kept on the {@link Floor} after generation so that later steps (placing monsters,
  * loot and keys) know where the entrance room, exit room and vaults are.
  */
-public class Room {
+public final class Room {
 
     /** The part a room plays in the floor's layout. */
     public enum Role {

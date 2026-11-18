@@ -15,7 +15,7 @@ import java.util.Objects;
  * Towson University Computer &amp; Information Sciences faculty; their roles and dialogue are
  * invented for the game and say nothing about the real people.
  */
-public class Npc extends Creature {
+public final class Npc extends Creature {
 
     /** Who (or what) the NPC is. */
     public enum Role {

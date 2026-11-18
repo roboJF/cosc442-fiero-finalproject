@@ -6,7 +6,7 @@ import java.util.Objects;
  * A drinkable potion. Until a kind is identified, potions of that kind are known only by their
  * color, which is shuffled every run.
  */
-public class Potion extends Item {
+public final class Potion extends Item {
 
     /**
      * Potion kinds. Columns: identified name, beneficial, spawn weight, value.

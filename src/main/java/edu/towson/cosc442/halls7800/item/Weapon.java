@@ -7,7 +7,7 @@ import java.util.Objects;
  * A melee weapon. Each upgrade level adds 1 to both ends of the damage range and 1 to accuracy.
  * Heavy weapons take longer to swing.
  */
-public class Weapon extends EquippableItem {
+public final class Weapon extends EquippableItem {
 
     /**
      * Weapon kinds. Columns: name, damage range, accuracy bonus, crit percent, ticks per attack,

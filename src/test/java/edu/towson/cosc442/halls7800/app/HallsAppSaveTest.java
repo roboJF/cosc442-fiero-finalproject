@@ -29,7 +29,7 @@ class HallsAppSaveTest {
 
         app.quitToTitle(game);
 
-        assertTrue(game.messages().lastText().startsWith("Could not save the game."));
+        assertTrue(game.lastMessage().startsWith("Could not save the game."));
         assertTrue(game.submit(new WaitCommand()).performed());
     }
 
@@ -44,7 +44,7 @@ class HallsAppSaveTest {
         app.closeWindow(close, game);
 
         assertTrue(close.isConsumed());
-        assertTrue(game.messages().lastText().startsWith("Could not save the game."));
+        assertTrue(game.lastMessage().startsWith("Could not save the game."));
         Files.delete(blockedLocation);
         assertTrue(game.submit(new WaitCommand()).performed());
 

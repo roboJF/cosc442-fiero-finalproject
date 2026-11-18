@@ -5,7 +5,7 @@ import java.util.Objects;
 /**
  * Something to eat, which staves off hunger.
  */
-public class Food extends Item {
+public final class Food extends Item {
 
     /**
      * Food kinds. Columns: singular, plural, satiety restored, HP restored, spawn weight, value.

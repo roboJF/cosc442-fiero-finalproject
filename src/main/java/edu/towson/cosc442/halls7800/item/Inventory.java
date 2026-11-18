@@ -10,7 +10,7 @@ import java.util.Objects;
  * merge into an existing stack of the same kind and do not use a new slot. Each slot is addressed
  * by a letter, 'a' for the first.
  */
-public class Inventory {
+public final class Inventory {
 
     /** Number of slots in a standard pack. */
     public static final int DEFAULT_CAPACITY = 18;

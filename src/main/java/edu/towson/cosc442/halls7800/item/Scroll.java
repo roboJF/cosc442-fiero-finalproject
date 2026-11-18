@@ -6,7 +6,7 @@ import java.util.Objects;
  * A single-use magic scroll. Until a kind is identified, its scrolls are known only by the strange
  * label written on them, which is shuffled every run. Scrolls cannot be read while blind.
  */
-public class Scroll extends Item {
+public final class Scroll extends Item {
 
     /**
      * Scroll kinds. Columns: identified name, spawn weight, value.

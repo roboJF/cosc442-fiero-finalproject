@@ -5,7 +5,7 @@ import java.util.Objects;
 /**
  * Items that matter to quests rather than to combat.
  */
-public class QuestItem extends Item {
+public final class QuestItem extends Item {
 
     /** Kinds of quest item. */
     public enum Kind {

@@ -39,13 +39,13 @@ Conover charges for an item after the pack accepts it. A stack can still accept 
 
 - Regression tests cover rejected armor and unfamiliar potions, a potion purchase that merges into a full pack, stacked pages and repeat turn-in, and poison on fully and partially absorbed hits.
 - New runs use version 3 records. Version 1 and 2 records keep their original gameplay rules and combat roll sequence when replayed or continued. [Save and replay notes](README.md#seeds-saves-and-replays)
-- JaCoCo reached 60.07% line and 48.24% branch coverage with the smoke test enabled. Headless coverage reached 50.08% line and 42.52% branch. CI now requires 47% line and 40% branch coverage.
+- JaCoCo reached 60.07% line and 48.24% branch coverage with the smoke test enabled. Headless coverage reached 50.08% line and 42.52% branch. This work raised the CI minimums to 47% line and 40% branch coverage.
 
 ## 5. Give the engine control of mutable game state
 
 `FloorContents.piles()` wraps the map but exposes the lists inside it. A headless probe emptied a pile through that view and left an empty entry behind. This lets callers bypass the engine's item-removal rules and replay recording. [FloorContents]
 
-- Give the UI read-only item and floor data, and keep writes behind engine methods. Test that callers cannot change piles through returned views. Review the 18 SpotBugs findings about exposed mutable state for similar risks.
+- Give the UI read-only item and floor data, and keep writes behind engine methods. Test that callers cannot change piles through returned views. Review the 13 remaining SpotBugs findings about shared mutable references, including references used by the UI to display the live game.
 
 [ReplayRunner]: src/main/java/edu/towson/cosc442/halls7800/persist/ReplayRunner.java
 [CommandCodec]: src/main/java/edu/towson/cosc442/halls7800/engine/CommandCodec.java

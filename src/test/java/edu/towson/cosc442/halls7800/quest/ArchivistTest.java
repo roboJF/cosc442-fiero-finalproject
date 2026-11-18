@@ -31,7 +31,7 @@ class ArchivistTest {
         assertEquals(2, quest.progress());
         assertEquals(Quest.State.ACTIVE, quest.state());
         talkToArchivist(game);
-        assertTrue(game.messages().lastText().contains("2 of 3 pages"));
+        assertTrue(game.lastMessage().contains("2 of 3 pages"));
 
         pickUpPage(game);
         List<QuestItem> pages = game.player().inventory().ofType(QuestItem.class);
@@ -66,7 +66,7 @@ class ArchivistTest {
         Quest quest = game.quests().get(Quest.Id.LOST_REQUIREMENTS);
         assertEquals(Quest.State.ACTIVE, quest.state());
         assertEquals(1, quest.progress());
-        assertTrue(game.messages().lastText().contains("1 of 3 pages"));
+        assertTrue(game.lastMessage().contains("1 of 3 pages"));
         assertEquals(0, rewardScrolls(game));
     }
 

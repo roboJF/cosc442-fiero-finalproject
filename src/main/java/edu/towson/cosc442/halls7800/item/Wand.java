@@ -7,7 +7,7 @@ import java.util.Objects;
  * in view. Wands slowly regain charges while carried: one charge every
  * {@link #RECHARGE_TURNS} turns.
  */
-public class Wand extends Item {
+public final class Wand extends Item {
 
     /** Turns needed to regain one charge. */
     public static final int RECHARGE_TURNS = 60;

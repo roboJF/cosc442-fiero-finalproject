@@ -11,7 +11,7 @@ import java.util.Objects;
  *                            +---progress lost--------+
  * </pre>
  */
-public class Quest {
+public final class Quest {
 
     /** The quests in the game. */
     public enum Id {

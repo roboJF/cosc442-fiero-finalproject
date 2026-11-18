@@ -133,7 +133,8 @@ final class SymbolLegend {
         Font headingFont = Font.font("Monospaced", FontWeight.BOLD, Math.max(10, Math.min(13, rowHeight * 0.45)));
         for (int i = 0; i < ENTRIES.size(); i++) {
             Entry entry = ENTRIES.get(i);
-            double x = 40 + (i / perColumn) * columnWidth;
+            int column = i / perColumn;
+            double x = 40 + column * columnWidth;
             double y = 64 + (i % perColumn) * rowHeight;
             if (entry.painter() == null) {
                 g.setFill(Color.web("#f2c14e"));

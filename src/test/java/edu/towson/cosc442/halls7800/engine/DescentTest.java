@@ -31,7 +31,7 @@ class DescentTest {
         assertEquals(3, game.depth());
         assertEquals(hp - 3, game.player().hp());
         assertEquals(HYDRA_TRAPDOOR, game.player().position());
-        assertTrue(game.messages().lastText().contains("seal blocks the trapdoor"));
+        assertTrue(game.lastMessage().contains("seal blocks the trapdoor"));
 
         guardian.takeDamage(guardian.hp());
         game.killMonster(guardian, game.player());

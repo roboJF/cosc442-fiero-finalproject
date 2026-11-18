@@ -11,7 +11,7 @@ import java.util.Objects;
  * <p>Floors are mutable (doors open, secret doors are discovered) and are owned by the game
  * session. Later stages attach creatures, items and traps to a floor.
  */
-public class Floor implements FloorView {
+public final class Floor implements FloorView {
 
     private final int width;
     private final int height;

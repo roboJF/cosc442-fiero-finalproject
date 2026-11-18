@@ -11,7 +11,7 @@ public final class FixedLayouts {
      * bottom leads back to the surface, and the down staircase in the east alcove leads into the
      * Halls. The side rooms are reserved for the hub's residents.
      */
-    public static final String[] ATRIUM = {
+    static final String[] ATRIUM = {
         "#########################################",
         "#.......#...........................#...#",
         "#.......#..O.....O.....O.....O......#...#",
@@ -34,7 +34,7 @@ public final class FixedLayouts {
      * The Sanctum at the bottom of the Halls: a pillared hall edged by chasms, with the Diploma's
      * altar in the north alcove. There is no down staircase.
      */
-    public static final String[] SANCTUM = {
+    static final String[] SANCTUM = {
         "#######################################",
         "################..._...################",
         "################.......################",
@@ -59,7 +59,7 @@ public final class FixedLayouts {
      * Orientation: the tutorial floor. Five rooms in a row teach movement, doors, items, combat,
      * traps and searching (the last room is behind a secret door), ending at a down staircase.
      */
-    public static final String[] ORIENTATION = {
+    static final String[] ORIENTATION = {
         "####################################################",
         "#.........#..........#..........#...........#......#",
         "#.........#..........#..........#...........#......#",

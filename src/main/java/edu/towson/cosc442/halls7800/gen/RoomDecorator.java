@@ -153,7 +153,7 @@ public class RoomDecorator {
         for (Position p : room.interior()) {
             int ix = p.x() - room.left();
             int iy = p.y() - room.top();
-            if (ix % 2 == 1 && iy % 2 == 1 && ix < room.width() - 1 && iy < room.height() - 1
+            if (ix % 2 != 0 && iy % 2 != 0 && ix < room.width() - 1 && iy < room.height() - 1
                     && !approach.contains(p)) {
                 floor.setTerrain(p, Terrain.PILLAR);
             }

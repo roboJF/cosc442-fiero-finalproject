@@ -40,7 +40,6 @@ public class HallsApp extends Application implements TitleScreen.Actions, GameVi
 
     private final SaveStore store;
     private AudioPlayer audio;
-    private Stage stage;
     private Scene scene;
     private Screen screen;
     private GameSession current;
@@ -58,9 +57,8 @@ public class HallsApp extends Application implements TitleScreen.Actions, GameVi
     }
 
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage stage) {
         audio = new AudioPlayer();
-        this.stage = primaryStage;
         this.seedArgument = getParameters().getNamed().get("seed");
         showTitle(0, null);
         scene = new Scene(screen.root(), 1024, 640);

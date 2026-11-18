@@ -5,7 +5,7 @@ import java.util.Objects;
 /**
  * One active status effect on a creature: its type, turns remaining, and strength.
  */
-public class StatusEffect {
+public final class StatusEffect {
 
     private final EffectType type;
     private int remaining;

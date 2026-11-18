@@ -5,9 +5,9 @@ import edu.towson.cosc442.halls7800.engine.GamePhase;
 import edu.towson.cosc442.halls7800.persist.HighScoreTable;
 import edu.towson.cosc442.halls7800.persist.LifetimeStats;
 import edu.towson.cosc442.halls7800.progression.Achievement;
-import java.util.Set;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -68,7 +68,7 @@ public class TitleScreen implements Screen {
     private final Canvas canvas = new Canvas();
     private final Pane root = new Pane(canvas);
     private final boolean hasSave;
-    private final HighScoreTable scores;
+    private final List<HighScoreTable.Entry> scoreEntries;
     private final int highlightRank;
     private final Set<Achievement> achievements;
     private final LifetimeStats lifetime;
@@ -93,13 +93,13 @@ public class TitleScreen implements Screen {
     public TitleScreen(Actions actions, String name, Difficulty difficulty, boolean hasSave,
                        HighScoreTable scores, Set<Achievement> achievements, LifetimeStats lifetime,
                        int highlightRank, String notice) {
-        this.achievements = achievements;
+        this.achievements = Set.copyOf(achievements);
         this.lifetime = lifetime;
         this.actions = actions;
         this.name = name;
         this.difficulty = difficulty;
         this.hasSave = hasSave;
-        this.scores = scores;
+        this.scoreEntries = List.copyOf(scores.entries());
         this.highlightRank = highlightRank;
         this.notice = notice;
         this.showScores = highlightRank > 0;
@@ -363,19 +363,19 @@ public class TitleScreen implements Screen {
         g.setFill(Color.web("#f2c14e"));
         g.fillText("HIGH SCORES", x, 140 * scale);
         g.setFont(Font.font("Monospaced", 14 * scale));
-        List<HighScoreTable.Entry> entries = scores.entries();
-        if (entries.isEmpty()) {
+        if (scoreEntries.isEmpty()) {
             g.setFill(Color.web("#e4e2ee"));
             g.fillText("No runs recorded yet. Be the first!", x, 174 * scale);
         }
-        for (int i = 0; i < entries.size(); i++) {
-            HighScoreTable.Entry e = entries.get(i);
+        for (int i = 0; i < scoreEntries.size(); i++) {
+            HighScoreTable.Entry e = scoreEntries.get(i);
             g.setFill(i + 1 == highlightRank ? Color.web("#f2c14e") : Color.web("#e4e2ee"));
             String outcome = e.outcome() == GamePhase.VICTORY ? "GRADUATED" : "fell on depth " + e.depth();
             g.fillText(String.format("%2d. %7d  %-16s %-14s %-13s %s", i + 1, e.score(), e.name(), outcome,
                     e.difficulty().title(), e.date()), x, 174 * scale + i * 22 * scale);
         }
         g.setFill(Color.web("#a8a4b8"));
-        g.fillText("Press Enter or Esc to return", x, 174 * scale + Math.max(1, entries.size()) * 22 * scale + 24 * scale);
+        g.fillText("Press Enter or Esc to return", x,
+                174 * scale + Math.max(1, scoreEntries.size()) * 22 * scale + 24 * scale);
     }
 }

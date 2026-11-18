@@ -6,7 +6,7 @@ import java.util.Objects;
  * A trap hidden in the floor. Traps start hidden; they are revealed when triggered or found by
  * searching. Only the player sets off traps.
  */
-public class Trap {
+public final class Trap {
 
     /** Kinds of trap. */
     public enum Type {

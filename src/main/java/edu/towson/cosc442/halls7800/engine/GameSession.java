@@ -53,7 +53,7 @@ import java.util.TreeMap;
  * <p>The session has no dependency on any user-interface library. Everything it does is driven
  * by {@link #submit(Command)}, so the same seed and commands reproduce a run.
  */
-public class GameSession {
+public final class GameSession {
 
     private final long seed;
     private final FloorSource floorSource;
@@ -829,7 +829,7 @@ public class GameSession {
     }
 
     /** @return the turn scheduler */
-    public TurnScheduler scheduler() {
+    TurnScheduler scheduler() {
         return scheduler;
     }
 
@@ -838,9 +838,17 @@ public class GameSession {
         return events;
     }
 
-    /** @return the message log */
-    public MessageLog messages() {
-        return log;
+    /**
+     * @param count maximum number of entries to return
+     * @return a snapshot of the most recent entries, oldest first
+     */
+    public List<MessageLog.Entry> recentMessages(int count) {
+        return log.recent(count);
+    }
+
+    /** @return the most recent message text, or {@code null} if the log is empty */
+    public String lastMessage() {
+        return log.lastText();
     }
 
     /** @return the player's sight radius in tiles */
