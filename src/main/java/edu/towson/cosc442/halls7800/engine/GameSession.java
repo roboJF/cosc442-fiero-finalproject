@@ -19,6 +19,7 @@ import edu.towson.cosc442.halls7800.item.Armor;
 import edu.towson.cosc442.halls7800.item.Gold;
 import edu.towson.cosc442.halls7800.item.Identification;
 import edu.towson.cosc442.halls7800.item.Item;
+import edu.towson.cosc442.halls7800.item.ItemCategory;
 import edu.towson.cosc442.halls7800.item.ItemGenerator;
 import edu.towson.cosc442.halls7800.item.Wand;
 import edu.towson.cosc442.halls7800.item.Weapon;
@@ -33,6 +34,7 @@ import edu.towson.cosc442.halls7800.world.Terrain;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -207,9 +209,24 @@ public final class GameSession {
         return contents().monsters();
     }
 
-    /** @return monsters and items on the current floor */
-    public FloorContents contents() {
+    /** @return the contents of the current floor for engine operations */
+    FloorContents contents() {
         return contentsOf(floor.depth());
+    }
+
+    /** @return the residents of the current floor */
+    public List<Npc> npcs() {
+        return contents().npcs();
+    }
+
+    /** @return the types and positions of discovered traps on the current floor */
+    public Map<Position, Trap.Type> discoveredTraps() {
+        return contents().discoveredTraps();
+    }
+
+    /** @return a snapshot of burning tiles and their remaining turns */
+    public Map<Position, Integer> burningTiles() {
+        return Collections.unmodifiableMap(new LinkedHashMap<>(contents().fires()));
     }
 
     private FloorContents contentsOf(int depth) {
@@ -344,7 +361,7 @@ public final class GameSession {
 
     /** Scoops up any gold at the player's feet and mentions what else lies there. */
     private void collectGoldAndLook(Position at) {
-        for (Item item : List.copyOf(contents().itemsAt(at))) {
+        for (Item item : List.copyOf(contents().ownedItemsAt(at))) {
             if (item instanceof Gold gold) {
                 contents().removeItem(at, gold);
                 player.addGold(gold.quantity());
@@ -353,7 +370,7 @@ public final class GameSession {
                 message("You pick up " + gold.quantity() + " gold.");
             }
         }
-        List<Item> rest = contents().itemsAt(at);
+        List<Item> rest = contents().ownedItemsAt(at);
         if (rest.size() == 1) {
             message("You see " + rest.get(0).describe(identification) + " here.");
         } else if (rest.size() > 1) {
@@ -365,10 +382,41 @@ public final class GameSession {
 
     /**
      * @param p a position on the current floor
-     * @return items lying there (empty if none)
+     * @return independent copies of items lying there (empty if none)
      */
     public List<Item> itemsAt(Position p) {
         return contents().itemsAt(p);
+    }
+
+    /** @return the category to draw at each occupied item tile on the current floor */
+    public Map<Position, ItemCategory> itemIcons() {
+        return contents().itemIcons();
+    }
+
+    /** An inventory display entry in the same order as the playable pack slots. */
+    public record PackEntry(String description, String equipmentSuffix, int sellPrice) {
+    }
+
+    /** @return immutable display data for the player's pack, in slot order */
+    public List<PackEntry> packEntries() {
+        return player.inventory().items().stream().map(item -> {
+            String equipment = item == player.weapon() ? " (wielded)" : item == player.wornArmor() ? " (worn)" : "";
+            return new PackEntry(describe(item), equipment, Shop.sellPrice(item));
+        }).toList();
+    }
+
+    /** @return the number of slots in the player's pack */
+    public int packCapacity() {
+        return player.inventory().capacity();
+    }
+
+    /** The label and price of one shop item in the order used by buy commands. */
+    public record ShopOffer(String description, int price) {
+    }
+
+    /** @return immutable display data for the shop */
+    public List<ShopOffer> shopOffers() {
+        return shop().stock().stream().map(item -> new ShopOffer(Shop.label(item), Shop.buyPrice(item))).toList();
     }
 
     /**
@@ -795,7 +843,7 @@ public final class GameSession {
 
     /** @return a read-only view of the current floor */
     public FloorView currentFloor() {
-        return floor;
+        return floor.readOnlyView();
     }
 
     /** @return the current depth */

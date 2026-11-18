@@ -5,7 +5,6 @@ import edu.towson.cosc442.halls7800.engine.GameSession;
 import edu.towson.cosc442.halls7800.engine.MessageLog;
 import edu.towson.cosc442.halls7800.engine.RunStats;
 import edu.towson.cosc442.halls7800.entity.Monster;
-import edu.towson.cosc442.halls7800.item.Item;
 import edu.towson.cosc442.halls7800.persist.ReplayRunner;
 import edu.towson.cosc442.halls7800.persist.RunRecord;
 import edu.towson.cosc442.halls7800.persist.SaveStore;
@@ -122,8 +121,8 @@ public final class ReplayTool {
             out.println("Cause of death: " + stats.causeOfDeath());
         }
         StringBuilder pack = new StringBuilder("Pack:");
-        for (Item item : session.player().inventory().items()) {
-            pack.append(' ').append(session.describe(item)).append(';');
+        for (GameSession.PackEntry item : session.packEntries()) {
+            pack.append(' ').append(item.description()).append(';');
         }
         out.println(pack);
     }

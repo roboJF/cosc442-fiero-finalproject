@@ -38,7 +38,7 @@ The full quality check runs JUnit, JaCoCo, PIT mutation testing, and SpotBugs.
 bash ./mvnw -B clean verify -Pquality
 ```
 
-JaCoCo requires at least 47.1% line coverage and 40% branch coverage across the project. Its HTML and
+JaCoCo requires at least 48% line coverage and 40.5% branch coverage across the project. Its HTML and
 XML reports go to `target/site/jacoco/`. PIT writes HTML and XML reports to `target/pit-reports/`.
 SpotBugs publishes `target/spotbugsXml.xml` and `target/spotbugs.sarif`.
 

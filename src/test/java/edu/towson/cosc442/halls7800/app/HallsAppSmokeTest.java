@@ -82,14 +82,17 @@ public class HallsAppSmokeTest {
             GameView continued = assertInstanceOf(GameView.class, scene.getRoot());
             assertNotSame(firstGame, continued);
             press(scene, KeyCode.E);
+            press(scene, KeyCode.R);
+            press(scene, KeyCode.C);
+            press(scene, KeyCode.G);
             press(scene, KeyCode.ESCAPE);
             assertNotSame(continued, scene.getRoot());
 
             RunRecord updated = store.loadRun().orElseThrow();
             assertEquals(new RunRecord(saved.seed(), saved.difficulty(), saved.playerName(),
-                    List.of("W", "M:NORTH_EAST"), saved.version()), updated);
+                    List.of("W", "M:NORTH_EAST", "R:2", "G"), saved.version()), updated);
             var replayed = ReplayRunner.replay(updated);
-            assertEquals(2, replayed.turn());
+            assertEquals(4, replayed.turn());
             assertEquals(new Position(27, 13), replayed.player().position());
         }
 

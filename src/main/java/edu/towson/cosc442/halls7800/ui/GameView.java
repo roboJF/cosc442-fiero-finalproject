@@ -14,7 +14,7 @@ import edu.towson.cosc442.halls7800.engine.ThrowCommand;
 import edu.towson.cosc442.halls7800.engine.UseItemCommand;
 import edu.towson.cosc442.halls7800.entity.Player;
 import edu.towson.cosc442.halls7800.item.Inventory;
-import edu.towson.cosc442.halls7800.item.Item;
+import edu.towson.cosc442.halls7800.item.ItemCategory;
 import edu.towson.cosc442.halls7800.entity.Companion;
 import edu.towson.cosc442.halls7800.entity.Npc;
 import edu.towson.cosc442.halls7800.engine.RunStats;
@@ -23,7 +23,6 @@ import edu.towson.cosc442.halls7800.progression.ScoreCalculator;
 import javafx.scene.Parent;
 import edu.towson.cosc442.halls7800.progression.Perk;
 import edu.towson.cosc442.halls7800.quest.Quest;
-import edu.towson.cosc442.halls7800.quest.Shop;
 import edu.towson.cosc442.halls7800.world.Trap;
 import java.util.Map;
 import javafx.scene.input.KeyCode;
@@ -338,7 +337,7 @@ public final class GameView extends BorderPane implements Screen {
             }
         }
         statusLabel.setText(status.toString());
-        inventoryLabel.setText(inventoryText(player));
+        inventoryLabel.setText(inventoryText());
         if (lookCursor != null) {
             promptLabel.setText("Examine: " + Examiner.describe(session, lookCursor) + "   (move to look, L or Esc to stop)");
         } else {
@@ -383,20 +382,19 @@ public final class GameView extends BorderPane implements Screen {
                 TileRenderer.shade(g, sx * tile, sy * tile, tile, light, !visible);
             }
         }
-        for (Map.Entry<Position, List<Item>> pile : session.contents().piles().entrySet()) {
-            Position p = pile.getKey();
-            if (floor.isVisible(p) && !pile.getValue().isEmpty()) {
-                Item top = pile.getValue().get(pile.getValue().size() - 1);
-                TileRenderer.drawItem(g, top.category(), (p.x() - originX) * tile, (p.y() - originY) * tile, tile);
+        for (Map.Entry<Position, ItemCategory> entry : session.itemIcons().entrySet()) {
+            Position p = entry.getKey();
+            if (floor.isVisible(p)) {
+                TileRenderer.drawItem(g, entry.getValue(), (p.x() - originX) * tile, (p.y() - originY) * tile, tile);
             }
         }
-        for (Map.Entry<Position, Trap> entry : session.contents().traps().entrySet()) {
+        for (Map.Entry<Position, Trap.Type> entry : session.discoveredTraps().entrySet()) {
             Position p = entry.getKey();
-            if (!entry.getValue().isHidden() && floor.isExplored(p)) {
+            if (floor.isExplored(p)) {
                 TileRenderer.drawTrap(g, entry.getValue(), (p.x() - originX) * tile, (p.y() - originY) * tile, tile);
             }
         }
-        for (Map.Entry<Position, Integer> fire : session.contents().fires().entrySet()) {
+        for (Map.Entry<Position, Integer> fire : session.burningTiles().entrySet()) {
             Position p = fire.getKey();
             if (floor.isVisible(p)) {
                 TileRenderer.drawFire(g, (p.x() - originX) * tile, (p.y() - originY) * tile, tile, fire.getValue());
@@ -407,7 +405,7 @@ public final class GameView extends BorderPane implements Screen {
             TileRenderer.drawCompanion(g, doc, (doc.position().x() - originX) * tile,
                     (doc.position().y() - originY) * tile, tile);
         }
-        for (Npc npc : session.contents().npcs()) {
+        for (Npc npc : session.npcs()) {
             if (floor.isVisible(npc.position())) {
                 TileRenderer.drawNpc(g, npc, (npc.position().x() - originX) * tile,
                         (npc.position().y() - originY) * tile, tile);
@@ -474,18 +472,14 @@ public final class GameView extends BorderPane implements Screen {
         g.setTextAlign(TextAlignment.LEFT);
     }
 
-    private String inventoryText(Player player) {
-        StringBuilder text = new StringBuilder("Pack (").append(player.inventory().size()).append('/')
-                .append(player.inventory().capacity()).append(')');
-        List<Item> items = player.inventory().items();
+    private String inventoryText() {
+        List<GameSession.PackEntry> items = session.packEntries();
+        StringBuilder text = new StringBuilder("Pack (").append(items.size()).append('/')
+                .append(session.packCapacity()).append(')');
         for (int i = 0; i < items.size(); i++) {
-            Item item = items.get(i);
-            text.append('\n').append(Inventory.letterFor(i)).append(") ").append(session.describe(item));
-            if (item == player.weapon()) {
-                text.append(" (wielded)");
-            } else if (item == player.wornArmor()) {
-                text.append(" (worn)");
-            }
+            GameSession.PackEntry item = items.get(i);
+            text.append('\n').append(Inventory.letterFor(i)).append(") ").append(item.description())
+                    .append(item.equipmentSuffix());
         }
         return text.toString();
     }
@@ -532,16 +526,16 @@ public final class GameView extends BorderPane implements Screen {
         lines.add("Your gold: " + session.player().gold());
         lines.add("");
         if (shopSelling) {
-            List<Item> pack = session.player().inventory().items();
+            List<GameSession.PackEntry> pack = session.packEntries();
             for (int i = 0; i < pack.size(); i++) {
-                Item item = pack.get(i);
-                lines.add(Inventory.letterFor(i) + ")  " + session.describe(item) + "   -> " + Shop.sellPrice(item) + " gold");
+                GameSession.PackEntry item = pack.get(i);
+                lines.add(Inventory.letterFor(i) + ")  " + item.description() + "   -> " + item.sellPrice() + " gold");
             }
         } else {
-            List<Item> stock = session.shop().stock();
+            List<GameSession.ShopOffer> stock = session.shopOffers();
             for (int i = 0; i < stock.size(); i++) {
-                Item item = stock.get(i);
-                lines.add(Inventory.letterFor(i) + ")  " + Shop.label(item) + "   " + Shop.buyPrice(item) + " gold");
+                GameSession.ShopOffer item = stock.get(i);
+                lines.add(Inventory.letterFor(i) + ")  " + item.description() + "   " + item.price() + " gold");
             }
         }
         String title = "CONOVER'S CURIO & CIRCUIT  -  " + (shopSelling ? "SELLING" : "BUYING")

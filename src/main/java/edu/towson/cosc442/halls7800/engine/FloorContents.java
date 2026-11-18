@@ -3,6 +3,7 @@ package edu.towson.cosc442.halls7800.engine;
 import edu.towson.cosc442.halls7800.entity.Monster;
 import edu.towson.cosc442.halls7800.entity.Npc;
 import edu.towson.cosc442.halls7800.item.Item;
+import edu.towson.cosc442.halls7800.item.ItemCategory;
 import edu.towson.cosc442.halls7800.world.Position;
 import edu.towson.cosc442.halls7800.world.Trap;
 import java.util.ArrayList;
@@ -64,24 +65,28 @@ public class FloorContents {
      * @param item the item
      */
     public void addItem(Position p, Item item) {
-        Objects.requireNonNull(item, "item");
+        Item stored = Objects.requireNonNull(item, "item").copy();
         List<Item> pile = piles.computeIfAbsent(p, k -> new ArrayList<>());
-        if (item.isStackable()) {
+        if (stored.isStackable()) {
             for (Item existing : pile) {
-                if (existing.canStackWith(item)) {
-                    existing.setQuantity(existing.quantity() + item.quantity());
+                if (existing.canStackWith(stored)) {
+                    existing.setQuantity(existing.quantity() + stored.quantity());
                     return;
                 }
             }
         }
-        pile.add(item);
+        pile.add(stored);
     }
 
     /**
      * @param p a position
-     * @return the items lying there, top of the pile last (empty if none)
+     * @return independent copies of the items lying there, top of the pile last (empty if none)
      */
     public List<Item> itemsAt(Position p) {
+        return ownedItemsAt(p).stream().map(Item::copy).toList();
+    }
+
+    List<Item> ownedItemsAt(Position p) {
         List<Item> pile = piles.get(p);
         return pile == null ? List.of() : Collections.unmodifiableList(pile);
     }
@@ -93,7 +98,7 @@ public class FloorContents {
      * @param item the item
      * @return {@code true} if it was there
      */
-    public boolean removeItem(Position p, Item item) {
+    boolean removeItem(Position p, Item item) {
         List<Item> pile = piles.get(p);
         if (pile == null || !pile.remove(item)) {
             return false;
@@ -104,9 +109,29 @@ public class FloorContents {
         return true;
     }
 
-    /** @return every non-empty pile, keyed by position */
+    /** @return a snapshot of every non-empty pile, with independent copies of its items */
     public Map<Position, List<Item>> piles() {
-        return Collections.unmodifiableMap(piles);
+        Map<Position, List<Item>> snapshot = new LinkedHashMap<>();
+        piles.forEach((position, pile) -> snapshot.put(position, pile.stream().map(Item::copy).toList()));
+        return Collections.unmodifiableMap(snapshot);
+    }
+
+    /** @return the category of the top item in each pile, in pile order */
+    Map<Position, ItemCategory> itemIcons() {
+        Map<Position, ItemCategory> icons = new LinkedHashMap<>();
+        piles.forEach((position, pile) -> icons.put(position, pile.get(pile.size() - 1).category()));
+        return Collections.unmodifiableMap(icons);
+    }
+
+    /** @return the types and positions of traps the player has discovered */
+    Map<Position, Trap.Type> discoveredTraps() {
+        Map<Position, Trap.Type> discovered = new LinkedHashMap<>();
+        traps.forEach((position, trap) -> {
+            if (!trap.isHidden()) {
+                discovered.put(position, trap.type());
+            }
+        });
+        return Collections.unmodifiableMap(discovered);
     }
 
     /**

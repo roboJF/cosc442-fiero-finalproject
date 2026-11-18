@@ -49,6 +49,13 @@ public abstract class Item {
      */
     protected abstract Item copyWithQuantity(int newQuantity);
 
+    /** @return an independent copy of this item with the same quantity and item state */
+    public final Item copy() {
+        Item copy = copyWithQuantity(quantity);
+        copy.quantity = quantity;
+        return copy;
+    }
+
     /** @return {@code true} if several of this item can share one inventory slot */
     public boolean isStackable() {
         return false;

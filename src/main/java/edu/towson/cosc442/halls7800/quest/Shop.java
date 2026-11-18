@@ -168,8 +168,10 @@ public final class Shop {
         if (item instanceof Scroll s) {
             return "scroll of " + s.kind().displayName();
         }
-        if (item instanceof EquippableItem e) {
-            e.reveal();
+        if (item instanceof EquippableItem equipment && !equipment.isKnown()) {
+            EquippableItem revealed = (EquippableItem) equipment.copy();
+            revealed.reveal();
+            return revealed.describe(null);
         }
         return item.describe(null);
     }

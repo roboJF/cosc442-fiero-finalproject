@@ -21,7 +21,7 @@ public final class PickUpCommand implements Command {
     public CommandResult execute(GameSession session) {
         Player player = session.player();
         Position here = player.position();
-        List<Item> pile = session.itemsAt(here);
+        List<Item> pile = session.contents().ownedItemsAt(here);
         if (pile.isEmpty()) {
             return CommandResult.rejected("There is nothing here to pick up.");
         }

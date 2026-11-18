@@ -81,7 +81,7 @@ final class SymbolLegend {
         e.add(terrain("Altar", Terrain.ALTAR));
         e.add(new Entry("Trap you have found", (g, x, y, s) -> {
             TileRenderer.drawTerrain(g, Terrain.FLOOR, x, y, s, 7, false);
-            TileRenderer.drawTrap(g, new Trap(Trap.Type.SPIKE, false), x, y, s);
+            TileRenderer.drawTrap(g, Trap.Type.SPIKE, x, y, s);
         }));
         e.add(new Entry("Fire", (g, x, y, s) -> {
             TileRenderer.drawTerrain(g, Terrain.TALL_GRASS, x, y, s, 7, false);

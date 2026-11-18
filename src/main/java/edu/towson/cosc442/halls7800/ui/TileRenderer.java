@@ -416,8 +416,8 @@ final class TileRenderer {
     }
 
     /** Draws a revealed trap as a pressure plate with a warning caret. */
-    static void drawTrap(GraphicsContext g, Trap trap, double x, double y, double s) {
-        Color color = Color.web(trap.type().color());
+    static void drawTrap(GraphicsContext g, Trap.Type trap, double x, double y, double s) {
+        Color color = Color.web(trap.color());
         g.setFill(color.deriveColor(0, 0.6, 0.35, 0.8));
         g.fillRect(x + s * 0.18, y + s * 0.55, s * 0.64, s * 0.25);
         g.setStroke(color);

@@ -21,6 +21,7 @@ public final class Floor implements FloorView {
     private final boolean[][] visible;
     private final boolean[][] explored;
     private final List<Room> rooms = new ArrayList<>();
+    private final ReadOnlyView readOnlyView = new ReadOnlyView();
     private Position entrance;
     private Position exit;
 
@@ -47,6 +48,68 @@ public final class Floor implements FloorView {
         this.visible = new boolean[height][width];
         this.explored = new boolean[height][width];
         fill(Terrain.WALL);
+    }
+
+    /** @return a live view with read-only access to this floor */
+    public FloorView readOnlyView() {
+        return readOnlyView;
+    }
+
+    private final class ReadOnlyView implements FloorView {
+        @Override
+        public int width() {
+            return width;
+        }
+
+        @Override
+        public int height() {
+            return height;
+        }
+
+        @Override
+        public int depth() {
+            return depth;
+        }
+
+        @Override
+        public String name() {
+            return name;
+        }
+
+        @Override
+        public boolean isInBounds(Position p) {
+            return Floor.this.isInBounds(p);
+        }
+
+        @Override
+        public Terrain terrainAt(Position p) {
+            return Floor.this.terrainAt(p);
+        }
+
+        @Override
+        public boolean isVisible(Position p) {
+            return Floor.this.isVisible(p);
+        }
+
+        @Override
+        public boolean isExplored(Position p) {
+            return Floor.this.isExplored(p);
+        }
+
+        @Override
+        public Position entrance() {
+            return entrance;
+        }
+
+        @Override
+        public Position exit() {
+            return exit;
+        }
+
+        @Override
+        public boolean canStep(Position from, Direction direction, boolean allowClosedDoors) {
+            return Floor.this.canStep(from, direction, allowClosedDoors);
+        }
     }
 
     @Override

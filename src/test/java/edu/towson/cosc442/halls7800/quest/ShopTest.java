@@ -13,6 +13,7 @@ import edu.towson.cosc442.halls7800.item.Inventory;
 import edu.towson.cosc442.halls7800.item.Item;
 import edu.towson.cosc442.halls7800.item.Potion;
 import edu.towson.cosc442.halls7800.item.Wand;
+import edu.towson.cosc442.halls7800.item.Weapon;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -94,5 +95,13 @@ class ShopTest {
 
     private Item stockedArmor() {
         return stock.stream().filter(Armor.class::isInstance).findFirst().orElseThrow();
+    }
+
+    @Test
+    void shopLabelShowsTheUpgradeWithoutRevealingTheActualItem() {
+        Weapon dagger = new Weapon(Weapon.Kind.DAGGER, 2, false);
+
+        assertEquals("a +2 dagger", Shop.label(dagger));
+        assertFalse(dagger.isKnown());
     }
 }
