@@ -40,6 +40,10 @@ final class TileRenderer {
     private static final Color STONE_DARK = Color.web("#5a5866");
     private static final Color TU_GOLD = Color.web("#f2c14e");
     private static final Color TU_BLACK = Color.web("#1a1a1f");
+    private static final Color KRIS_SHIRT = Color.web("#b5e61d");
+    private static final Color KRIS_SKIN = Color.web("#ffc90e");
+    private static final Color KRIS_HAIR = Color.web("#3d120e");
+    private static final Color KRIS_STRIPE = Color.web("#fff200");
 
     // Floor and wall colors change with the zone; see usePalette.
     private static Color floorColor = Color.web("#2b2a33");
@@ -277,19 +281,25 @@ final class TileRenderer {
 
     /** Draws the player: a small adventurer in TU black and gold. */
     static void drawPlayer(GraphicsContext g, double x, double y, double s) {
+        drawPlayer(g, x, y, s, "");
+    }
+
+    /** Draws the same player model with the palette selected by the player's name. */
+    static void drawPlayer(GraphicsContext g, double x, double y, double s, String name) {
+        boolean kris = "Kris".equals(name);
         shadow(g, x, y, s);
-        g.setFill(TU_GOLD);
+        g.setFill(kris ? KRIS_HAIR : TU_GOLD);
         g.fillPolygon(new double[] {x + s * 0.28, x + s * 0.72, x + s * 0.8, x + s * 0.2},
                 new double[] {y + s * 0.38, y + s * 0.38, y + s * 0.86, y + s * 0.86}, 4);
-        g.setFill(TU_BLACK);
+        g.setFill(kris ? KRIS_SHIRT : TU_BLACK);
         g.fillRoundRect(x + s * 0.33, y + s * 0.4, s * 0.34, s * 0.42, s * 0.12, s * 0.12);
-        g.setFill(TU_GOLD);
-        g.fillRect(x + s * 0.33, y + s * 0.56, s * 0.34, s * 0.06);
-        g.setFill(Color.web("#e9c49c"));
+        g.setFill(kris ? KRIS_STRIPE : TU_GOLD);
+        g.fillRect(x + s * 0.33, y + s * (kris ? 0.50 : 0.56), s * 0.34, s * (kris ? 0.18 : 0.06));
+        g.setFill(kris ? KRIS_SKIN : Color.web("#e9c49c"));
         g.fillOval(x + s * 0.35, y + s * 0.12, s * 0.3, s * 0.3);
-        g.setFill(TU_BLACK);
+        g.setFill(kris ? KRIS_HAIR : TU_BLACK);
         g.fillArc(x + s * 0.33, y + s * 0.08, s * 0.34, s * 0.26, 0, 180, ArcType.ROUND);
-        g.setStroke(Color.web("#2a1e05"));
+        g.setStroke(kris ? KRIS_HAIR : Color.web("#2a1e05"));
         g.setLineWidth(1);
         g.strokeOval(x + s * 0.35, y + s * 0.12, s * 0.3, s * 0.3);
     }

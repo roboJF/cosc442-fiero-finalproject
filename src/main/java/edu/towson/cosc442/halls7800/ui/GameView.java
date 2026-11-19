@@ -417,7 +417,8 @@ public final class GameView extends BorderPane implements Screen {
                         (m.position().y() - originY) * tile, tile);
             }
         }
-        TileRenderer.drawPlayer(g, (player.x() - originX) * tile, (player.y() - originY) * tile, tile);
+        TileRenderer.drawPlayer(g, (player.x() - originX) * tile, (player.y() - originY) * tile, tile,
+                session.player().name());
         if (lookCursor != null) {
             g.setStroke(Color.web("#f2c14e"));
             g.setLineWidth(2);
