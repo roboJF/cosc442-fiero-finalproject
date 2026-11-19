@@ -124,7 +124,8 @@ public final class GameSession {
         this.actionRules = Objects.requireNonNull(actionRules, "actionRules");
         this.identification = new Identification(rng(RandomStream.IDENTIFY));
         this.floor = obtainFloor(GameRules.HUB_DEPTH);
-        this.player = new Player(playerName, floor.entrance());
+        this.player = new Player(playerName, floor.entrance(),
+                position -> signal(GameEvent.Type.PLAYER_DAMAGED, position));
         giveStartingKit();
         quests.get(Quest.Id.DIPLOMA).start();
         if (difficulty.bonusHp() != 0) {

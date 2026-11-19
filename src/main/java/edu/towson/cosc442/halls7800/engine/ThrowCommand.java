@@ -37,6 +37,7 @@ public record ThrowCommand(int slot) implements Command {
             return CommandResult.rejected("There is nothing in range to throw at.");
         }
         ThrownWeapon one = (ThrownWeapon) player.inventory().removeOne(missiles);
+        session.signal(GameEvent.Type.ITEM_USED, player.position());
         List<Position> flight = LineOfSight.trajectory(session.floor(), player.position(), target.position(),
                 ThrownWeapon.RANGE);
         Position landing = flight.isEmpty() ? player.position() : flight.get(flight.size() - 1);

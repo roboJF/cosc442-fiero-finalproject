@@ -3,9 +3,8 @@ package edu.towson.cosc442.halls7800.ui.audio;
 import javax.sound.sampled.AudioFormat;
 
 /**
- * A tiny chiptune synthesizer: square, pulse, triangle and noise oscillators with a simple
- * envelope, rendered into mono 16-bit PCM. Everything the game plays is generated here at runtime,
- * so the project needs no audio files.
+ * A tiny chiptune synthesizer that renders the game's standard audio into mono 16-bit PCM using
+ * square, pulse, triangle and noise oscillators with a simple envelope.
  */
 final class Synth {
 

@@ -14,11 +14,14 @@ import javax.sound.midi.Sequence;
 import javax.sound.midi.Sequencer;
 import javax.sound.midi.Synthesizer;
 import javax.sound.midi.SysexMessage;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import javax.sound.sampled.UnsupportedAudioFileException;
 
 /**
- * Plays the game's synthesized themes and sound effects (see {@link Synth}) and the bundled MIDI theme.
+ * Plays synthesized audio (see {@link Synth}), the bundled MIDI theme, and WAV sound effects.
  *
  * <p>Music and sound effects can be switched on and off independently; the choices are
  * remembered between runs. If the computer has no usable audio device, the player quietly does
@@ -81,7 +84,7 @@ public class AudioPlayer {
             return;
         }
         try {
-            Clip clip = tuneClips.computeIfAbsent(current, t -> open(t.render(MUSIC_GAIN)));
+            Clip clip = tuneClips.computeIfAbsent(current, t -> open(Synth.FORMAT, t.render(MUSIC_GAIN)));
             if (clip == null) {
                 return;
             }
@@ -165,7 +168,7 @@ public class AudioPlayer {
             return;
         }
         try {
-            Clip clip = soundClips.computeIfAbsent(sound, s -> open(s.render(SFX_GAIN)));
+            Clip clip = soundClips.computeIfAbsent(sound, this::openSound);
             if (clip != null) {
                 clip.stop();
                 clip.setFramePosition(0);
@@ -180,16 +183,27 @@ public class AudioPlayer {
      * Plays the sound effect for a game event, if it has one.
      *
      * @param event the event
+     * @param kris whether the Kris easter egg is active
      */
-    public void onEvent(GameEvent event) {
-        play(soundFor(event));
+    public void onEvent(GameEvent event, boolean kris) {
+        play(soundFor(event, kris));
     }
 
-    /**
-     * @param event a game event
-     * @return the effect that goes with it, or {@code null} for none
-     */
-    static Sound soundFor(GameEvent event) {
+    static Sound soundFor(GameEvent event, boolean kris) {
+        if (kris) {
+            return switch (event.type()) {
+                case ATTACK_HIT -> Sound.KRIS_HIT;
+                case PLAYER_DAMAGED -> Sound.KRIS_HURT;
+                case PLAYER_HURT -> null;
+                case CREATURE_DIED, BOSS_DEFEATED -> Sound.KRIS_DAMAGE;
+                case POTION_DRUNK, SCROLL_READ, FOOD_EATEN, ITEM_EQUIPPED, WAND_ZAPPED, ITEM_USED -> Sound.KRIS_POWER;
+                default -> standardSoundFor(event);
+            };
+        }
+        return standardSoundFor(event);
+    }
+
+    private static Sound standardSoundFor(GameEvent event) {
         return switch (event.type()) {
             case ATTACK_HIT -> Sound.HIT;
             case ATTACK_MISSED -> Sound.MISS;
@@ -259,10 +273,25 @@ public class AudioPlayer {
         soundClips.clear();
     }
 
-    private Clip open(byte[] pcm) {
+    private Clip openSound(Sound sound) {
+        if (sound.wavResource() == null) {
+            return open(Synth.FORMAT, sound.render(SFX_GAIN));
+        }
+        URL resource = AudioPlayer.class.getResource(sound.wavResource());
+        if (resource == null) {
+            return null;
+        }
+        try (AudioInputStream stream = AudioSystem.getAudioInputStream(resource)) {
+            return open(stream.getFormat(), stream.readAllBytes());
+        } catch (IOException | UnsupportedAudioFileException e) {
+            return null;
+        }
+    }
+
+    private Clip open(AudioFormat format, byte[] pcm) {
         try {
             Clip clip = AudioSystem.getClip();
-            clip.open(Synth.FORMAT, pcm, 0, pcm.length);
+            clip.open(format, pcm, 0, pcm.length);
             return clip;
         } catch (Exception e) {
             available = false;

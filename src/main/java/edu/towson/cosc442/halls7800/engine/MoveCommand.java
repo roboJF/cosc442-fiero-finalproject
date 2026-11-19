@@ -125,6 +125,7 @@ public record MoveCommand(Direction direction) implements Command {
     private static CommandResult openVault(GameSession session, Floor floor, Position door, int cost, String text) {
         floor.setTerrain(door, Terrain.DOOR_OPEN);
         session.quests().onVaultUnlocked();
+        session.signal(GameEvent.Type.ITEM_USED, door);
         session.publish(new GameEvent(GameEvent.Type.DOOR_CHANGED, null, door, floor.depth()));
         return CommandResult.acted(cost, text);
     }

@@ -1,12 +1,10 @@
 package edu.towson.cosc442.halls7800.ui.audio;
 
 import edu.towson.cosc442.halls7800.ui.audio.Synth.Wave;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The game's sound effects. Each effect is a short sequence of tones (frequency sweep, length in
- * milliseconds, wave, volume), rendered once and cached by {@link AudioPlayer}.
+ * The game's sound effects, synthesized from short sequences of tones or loaded from bundled WAVs.
  */
 public enum Sound {
     HIT(seg(2000, 800, 40, Wave.NOISE, 0.5), seg(220, 110, 60, Wave.SQUARE, 0.4)),
@@ -36,16 +34,31 @@ public enum Sound {
     TURTLES(seg(520, 520, 70, Wave.SQUARE, 0.3), seg(480, 480, 70, Wave.SQUARE, 0.3),
             seg(440, 440, 70, Wave.SQUARE, 0.3), seg(300, 280, 200, Wave.SQUARE, 0.3)),
     ACHIEVEMENT(seg(784, 784, 80, Wave.PULSE, 0.3), seg(1047, 1047, 80, Wave.PULSE, 0.3),
-            seg(1319, 1319, 200, Wave.PULSE, 0.3));
+            seg(1319, 1319, 200, Wave.PULSE, 0.3)),
+    KRIS_HIT("/audio/snd_hit.wav"),
+    KRIS_HURT("/audio/snd_hurt1.wav"),
+    KRIS_DAMAGE("/audio/snd_damage.wav"),
+    KRIS_POWER("/audio/snd_power.wav");
 
     /** One piece of a sound effect. */
     private record Segment(double f0, double f1, int millis, Wave wave, double volume) {
     }
 
-    private final List<Segment> segments = new ArrayList<>();
+    private final List<Segment> segments;
+    private final String wavResource;
 
     Sound(Segment... parts) {
-        segments.addAll(List.of(parts));
+        segments = List.of(parts);
+        wavResource = null;
+    }
+
+    Sound(String wavResource) {
+        segments = List.of();
+        this.wavResource = wavResource;
+    }
+
+    String wavResource() {
+        return wavResource;
     }
 
     private static Segment seg(double f0, double f1, int millis, Wave wave, double volume) {

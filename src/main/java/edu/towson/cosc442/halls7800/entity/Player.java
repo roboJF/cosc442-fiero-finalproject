@@ -13,7 +13,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * The adventurer controlled by the user. The player's actions come from commands submitted to
@@ -61,6 +63,7 @@ public class Player extends Creature {
     }
 
     private final Inventory inventory = new Inventory();
+    private final Consumer<Position> damageListener;
     private Weapon weapon;
     private Armor armor;
     private int gold;
@@ -80,7 +83,17 @@ public class Player extends Creature {
      * @param position starting position
      */
     public Player(String name, Position position) {
+        this(name, position, ignored -> { });
+    }
+
+    /**
+     * @param name the adventurer's name
+     * @param position starting position
+     * @param damageListener receives the player's position each time they lose HP to damage
+     */
+    public Player(String name, Position position, Consumer<Position> damageListener) {
         super(name, position, STARTING_HP);
+        this.damageListener = Objects.requireNonNull(damageListener, "damageListener");
         setBaseAccuracy(BASE_ACCURACY);
         setBaseEvasion(BASE_EVASION);
         setBaseArmor(0);
@@ -89,6 +102,15 @@ public class Player extends Creature {
     @Override
     public boolean isPlayer() {
         return true;
+    }
+
+    @Override
+    public int takeDamage(int amount) {
+        int lost = super.takeDamage(amount);
+        if (lost > 0) {
+            damageListener.accept(position());
+        }
+        return lost;
     }
 
     // ----- combat -----

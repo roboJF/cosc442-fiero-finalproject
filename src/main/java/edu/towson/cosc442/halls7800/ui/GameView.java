@@ -121,7 +121,7 @@ public final class GameView extends BorderPane implements Screen {
         this.listener = listener;
         this.audio = audio;
         this.kris = "Kris".equals(session.player().name());
-        session.events().subscribe(audio::onEvent);
+        session.events().subscribe(event -> audio.onEvent(event, kris));
 
         Pane mapPane = new Pane(canvas);
         mapPane.setStyle("-fx-background-color: #0b0b10;");

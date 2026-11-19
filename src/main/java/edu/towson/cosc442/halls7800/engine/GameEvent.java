@@ -32,8 +32,10 @@ public record GameEvent(Type type, String message, Position position, int depth)
         ATTACK_HIT,
         /** An attack involving the player or companion missed. */
         ATTACK_MISSED,
-        /** A monster hit the player. */
+        /** A monster landed an attack on the player, including hits that deal no damage. */
         PLAYER_HURT,
+        /** The player lost HP to damage from any source. */
+        PLAYER_DAMAGED,
         /** A monster was defeated. */
         CREATURE_DIED,
         /** A boss was defeated. */
@@ -50,10 +52,12 @@ public record GameEvent(Type type, String message, Position position, int depth)
         SCROLL_READ,
         /** The player ate food. */
         FOOD_EATEN,
-        /** The player equipped or removed equipment. */
+        /** The player equipped a weapon or armor. */
         ITEM_EQUIPPED,
         /** The player zapped a wand. */
         WAND_ZAPPED,
+        /** The player used an item that has no dedicated use event. */
+        ITEM_USED,
         /** The player set off a trap. */
         TRAP_TRIGGERED,
         /** The player gained a level. */

@@ -5,6 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import edu.towson.cosc442.halls7800.combat.Combat;
+import edu.towson.cosc442.halls7800.effect.EffectType;
+import edu.towson.cosc442.halls7800.entity.Monster;
+import edu.towson.cosc442.halls7800.entity.MonsterType;
+import edu.towson.cosc442.halls7800.entity.Player;
 import edu.towson.cosc442.halls7800.gen.FixedFloorSource;
 import edu.towson.cosc442.halls7800.item.Gold;
 import edu.towson.cosc442.halls7800.item.ItemCategory;
@@ -14,6 +19,7 @@ import edu.towson.cosc442.halls7800.world.FloorView;
 import edu.towson.cosc442.halls7800.world.Position;
 import edu.towson.cosc442.halls7800.world.Terrain;
 import edu.towson.cosc442.halls7800.world.Trap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -117,6 +123,66 @@ class GameSessionTest {
         assertThrows(UnsupportedOperationException.class, discovered::clear);
         assertTrue(hidden.isEmpty());
         assertTrue(game.burningTiles().isEmpty());
+    }
+
+    @Test
+    void aCombatHitOnlySignalsDamageWhenThePlayerLosesHp() {
+        List<Position> damage = watchPlayerDamage();
+        Player player = game.player();
+        Monster rat = new Monster(MonsterType.GIANT_RAT, new Position(2, 1), false);
+        player.applyEffect(EffectType.STUNNED, 1, 0);
+        player.applyEffect(EffectType.SHIELDED, 1, 100);
+        player.setWornArmor(null);
+
+        var absorbed = Combat.attack(game, rat, player, false);
+        assertTrue(absorbed.hit());
+        assertEquals(0, absorbed.damage());
+        assertTrue(damage.isEmpty());
+
+        player.effects().remove(EffectType.SHIELDED);
+        assertTrue(Combat.attack(game, rat, player, false).damage() > 0);
+        assertEquals(List.of(player.position()), damage);
+    }
+
+    @Test
+    void aSpikeTrapAndEachDamageOverTimeEffectSignalDamage() {
+        List<Position> damage = watchPlayerDamage();
+        Position destination = new Position(2, 1);
+        game.contents().addTrap(destination, new Trap(Trap.Type.SPIKE, true));
+
+        game.submit(new MoveCommand(Direction.EAST));
+        assertEquals(List.of(destination), damage);
+
+        game.player().applyEffect(EffectType.BURNING, 1, 2);
+        game.player().applyEffect(EffectType.POISONED, 1, 1);
+        game.submit(new WaitCommand());
+        assertEquals(List.of(destination, destination, destination), damage);
+    }
+
+    @Test
+    void starvationDamageSignalsDamage() {
+        Player player = game.player();
+        for (int turn = 0; turn < Player.STARTING_SATIETY; turn++) {
+            player.tickHunger();
+        }
+        assertEquals(Player.Hunger.STARVING, player.hunger());
+        List<Position> damage = watchPlayerDamage();
+
+        for (int turn = 0; turn < Player.STARVE_INTERVAL; turn++) {
+            game.submit(new WaitCommand());
+        }
+
+        assertEquals(List.of(player.position()), damage);
+    }
+
+    private List<Position> watchPlayerDamage() {
+        List<Position> damage = new ArrayList<>();
+        game.events().subscribe(event -> {
+            if (event.type() == GameEvent.Type.PLAYER_DAMAGED) {
+                damage.add(event.position());
+            }
+        });
+        return damage;
     }
 
     @Test

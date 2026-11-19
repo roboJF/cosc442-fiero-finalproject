@@ -67,6 +67,7 @@ public record UseItemCommand(int slot) implements Command {
                 return CommandResult.rejected("You are already in the Atrium. Take the south stairs out.");
             }
             session.changeFloor(GameRules.HUB_DEPTH);
+            session.signal(GameEvent.Type.ITEM_USED, player.position());
             return CommandResult.acted(player.actionCost(), "You raise the Diploma. The Halls fold around you, "
                     + "and you stand once more in the Atrium.");
         }
@@ -89,6 +90,7 @@ public record UseItemCommand(int slot) implements Command {
         }
         if (current == weapon) {
             player.setWeapon(null);
+            session.signal(GameEvent.Type.ITEM_USED, player.position());
             return CommandResult.acted(player.actionCost(), "You put away your " + name(session, weapon) + ".");
         }
         player.setWeapon(weapon);
@@ -104,6 +106,7 @@ public record UseItemCommand(int slot) implements Command {
         int cost = player.actionCost() * 2;
         if (current == armor) {
             player.setWornArmor(null);
+            session.signal(GameEvent.Type.ITEM_USED, player.position());
             return CommandResult.acted(cost, "You take off your " + name(session, armor) + ".");
         }
         player.setWornArmor(armor);
