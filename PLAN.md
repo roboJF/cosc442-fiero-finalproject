@@ -38,7 +38,7 @@ The suite grew from 43 to 62 test cases. The new tests use fixed maps and script
 Conover charges for an item after the pack accepts it. A stack can still accept matching items when every slot is occupied. The Archivist counts the pages in a stack and grants the reward once. On-hit effects require damage to get through the shield. [Beta reports](BUGS.md)
 
 - Regression tests cover rejected armor and unfamiliar potions, a potion purchase that merges into a full pack, stacked pages and repeat turn-in, and poison on fully and partially absorbed hits.
-- New runs use version 3 records. Version 1 and 2 records keep their original gameplay rules and combat roll sequence when replayed or continued. [Save and replay notes](README.md#seeds-saves-and-replays)
+- This work introduced version 3 records. Version 1 and 2 records keep their original gameplay rules and combat roll sequence when replayed or continued. [Save and replay notes](README.md#seeds-saves-and-replays)
 - JaCoCo reached 60.07% line and 48.24% branch coverage with the smoke test enabled. Headless coverage reached 50.08% line and 42.52% branch. This work raised the CI minimums to 47% line and 40% branch coverage.
 
 ## 5. Give the engine control of mutable game state (Completed)
@@ -47,7 +47,7 @@ Conover charges for an item after the pack accepts it. A stack can still accept 
 
 - Regression tests verify that callers cannot clear piles or change stored stacks through aliases. They also cover drop and pickup recording, gold collection, shop display, and a floor view that reflects door changes. The JavaFX smoke test drops and picks up an item after continuing a save.
 - Reviewed all 13 SpotBugs findings about mutable references. The warning for `currentFloor()` cleared. Twelve remain on shared objects used by the engine, actor and inventory APIs, and JavaFX.
-- Headless JaCoCo reached 50.92% line and 43.04% branch coverage. Coverage with the JavaFX smoke test reached 61.69% line and 49.31% branch. CI now requires 48% line and 40.5% branch coverage.
+- Headless JaCoCo reached 50.92% line and 43.04% branch coverage. Coverage with the JavaFX smoke test reached 61.69% line and 49.31% branch. This work raised the CI minimums to 48% line and 40.5% branch coverage.
 
 [ReplayRunner]: src/main/java/edu/towson/cosc442/halls7800/persist/ReplayRunner.java
 [CommandCodec]: src/main/java/edu/towson/cosc442/halls7800/engine/CommandCodec.java

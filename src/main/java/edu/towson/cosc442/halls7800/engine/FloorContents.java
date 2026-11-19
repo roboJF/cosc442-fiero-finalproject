@@ -14,16 +14,27 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Everything on one floor besides its terrain: monsters, friendly NPCs, traps and piles of items. The session keeps one
- * of these per visited depth, so a floor's contents are preserved when the player leaves it.
+ * The state of one floor besides its terrain, including monsters, items, traps and shrine charges.
+ * The session keeps one of these per visited depth, so the state is preserved when the player leaves it.
  */
 public class FloorContents {
+
+    private static final int INITIAL_SHRINE_CHARGES = 3;
 
     private final List<Monster> monsters = new ArrayList<>();
     private final Map<Position, List<Item>> piles = new LinkedHashMap<>();
     private final Map<Position, Trap> traps = new LinkedHashMap<>();
     private final List<Npc> npcs = new ArrayList<>();
     private final Map<Position, Integer> fires = new LinkedHashMap<>();
+    private final Map<Position, Integer> shrineCharges = new LinkedHashMap<>();
+
+    int shrineChargesAt(Position p) {
+        return shrineCharges.getOrDefault(p, INITIAL_SHRINE_CHARGES);
+    }
+
+    void spendShrineCharges(Position p, int cost) {
+        shrineCharges.put(p, shrineChargesAt(p) - cost);
+    }
 
     /** @return the monsters, in the order they were added */
     public List<Monster> monsters() {

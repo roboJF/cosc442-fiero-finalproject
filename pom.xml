@@ -124,9 +124,9 @@
         <profile>
             <id>quality</id>
             <properties>
-                <!-- Keep the minimums below the headless results recorded in PLAN.md. -->
-                <quality.coverage.line.minimum>48%</quality.coverage.line.minimum>
-                <quality.coverage.branch.minimum>40.5%</quality.coverage.branch.minimum>
+                <!-- Base these minimums on headless test coverage. -->
+                <quality.coverage.line.minimum>51%</quality.coverage.line.minimum>
+                <quality.coverage.branch.minimum>44%</quality.coverage.branch.minimum>
             </properties>
             <build>
                 <plugins>

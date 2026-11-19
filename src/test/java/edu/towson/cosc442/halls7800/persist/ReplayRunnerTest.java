@@ -9,13 +9,16 @@ import edu.towson.cosc442.halls7800.effect.EffectType;
 import edu.towson.cosc442.halls7800.engine.ActionRules;
 import edu.towson.cosc442.halls7800.engine.Difficulty;
 import edu.towson.cosc442.halls7800.engine.DropCommand;
+import edu.towson.cosc442.halls7800.engine.Examiner;
 import edu.towson.cosc442.halls7800.engine.GameRules;
 import edu.towson.cosc442.halls7800.engine.GameSession;
 import edu.towson.cosc442.halls7800.engine.MoveCommand;
+import edu.towson.cosc442.halls7800.engine.PickUpCommand;
 import edu.towson.cosc442.halls7800.engine.SearchCommand;
 import edu.towson.cosc442.halls7800.engine.StairsCommand;
 import edu.towson.cosc442.halls7800.engine.WaitCommand;
 import edu.towson.cosc442.halls7800.gen.GameFactory;
+import edu.towson.cosc442.halls7800.item.Potion;
 import edu.towson.cosc442.halls7800.world.Direction;
 import edu.towson.cosc442.halls7800.world.Position;
 import java.nio.file.Path;
@@ -105,6 +108,51 @@ class ReplayRunnerTest {
         assertEquals(1, restored.depth());
         assertEquals(entrance, restored.player().position());
         assertEquals(List.of(droppedItem), restored.itemsAt(entrance).stream().map(restored::describe).toList());
+    }
+
+    @Test
+    void continueRestoresShrineChargesAndIdentificationUsingTheSavedRules() {
+        GameSession original = GameFactory.newGame(115L, "Ada", Difficulty.FRESHMAN);
+        enterDungeon(original);
+        move(original, Direction.EAST, 1);
+        move(original, Direction.SOUTH_EAST, 1);
+        int potionSlot = original.player().inventory().items().size();
+        assertTrue(original.submit(new PickUpCommand()).performed());
+        Potion potion = (Potion) original.player().inventory().get(potionSlot);
+        assertEquals(Potion.Kind.SHIELDING, potion.kind());
+        assertFalse(original.identification().isKnown(potion.kind()));
+
+        move(original, Direction.WEST, 2);
+        move(original, Direction.SOUTH, 13);
+        move(original, Direction.SOUTH_EAST, 1);
+        move(original, Direction.SOUTH, 1);
+        move(original, Direction.SOUTH_WEST, 1);
+        Position altar = new Position(9, 21);
+        assertEquals(altar, original.player().position());
+        assertTrue(Examiner.describe(original, altar).contains("3 charges remaining"));
+
+        assertTrue(original.submit(new DropCommand(potionSlot)).performed());
+        assertTrue(original.identification().isKnown(potion.kind()));
+        assertTrue(Examiner.describe(original, altar).contains("2 charges remaining"));
+
+        GameSession restored = saveAndContinue(original);
+        assertEquals(4, RunRecord.of(restored).version());
+        assertEquals(RunRecord.of(original), RunRecord.of(restored));
+        assertEquals(original.turn(), restored.turn());
+        assertEquals(original.player().position(), restored.player().position());
+        assertEquals(original.player().hp(), restored.player().hp());
+        assertEquals(Examiner.describe(original, altar), Examiner.describe(restored, altar));
+        assertTrue(restored.identification().isKnown(potion.kind()));
+
+        RunRecord oldRecord = new RunRecord(original.seed(), original.difficulty(), original.player().name(),
+                original.recording(), 3);
+        GameSession legacy = ReplayRunner.replay(oldRecord);
+        assertEquals(oldRecord, RunRecord.of(legacy));
+        assertEquals(original.turn(), legacy.turn());
+        assertEquals(original.render(), legacy.render());
+        assertFalse(legacy.identification().isKnown(potion.kind()));
+        assertFalse(Examiner.describe(legacy, altar).contains("shrine altar"));
+        assertTrue(legacy.itemsAt(altar).stream().anyMatch(item -> item instanceof Potion p && p.kind() == potion.kind()));
     }
 
     @Test

@@ -38,7 +38,7 @@ The full quality check runs JUnit, JaCoCo, PIT mutation testing, and SpotBugs.
 bash ./mvnw -B clean verify -Pquality
 ```
 
-JaCoCo requires at least 48% line coverage and 40.5% branch coverage across the project. Its HTML and
+JaCoCo requires at least 51% line coverage and 44% branch coverage across the project. Its HTML and
 XML reports go to `target/site/jacoco/`. PIT writes HTML and XML reports to `target/pit-reports/`.
 SpotBugs publishes `target/spotbugsXml.xml` and `target/spotbugs.sarif`.
 
@@ -69,10 +69,9 @@ The game keeps its files in `~/.halls7800` (on Windows, `C:\Users\<you>\.halls78
 | `scores.txt`, `achievements.txt`, `lifetime-stats.txt` | high scores, achievements and lifetime totals |
 
 If a save fails, the game stays open so you can fix the save location and retry. New runs use
-version 3 records with the shop, quest progress, and shield fixes. Version 1 and version 2 runs
-retain their original rules and record version when continued. If an older build omitted a stunned
-turn, the file lacks the input needed to reconstruct that turn and the run may resume from a
-different state.
+version 4 records with shrine altars. Version 1, 2, and 3 runs retain their original rules and record
+version when continued. If an older build omitted a stunned turn, the file lacks the input needed
+to reconstruct that turn and the run may resume from a different state.
 
 A run record is plain text: the seed, difficulty, name, and every action taken. To replay one
 without opening the game window:

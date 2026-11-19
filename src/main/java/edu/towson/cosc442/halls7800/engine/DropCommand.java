@@ -3,6 +3,7 @@ package edu.towson.cosc442.halls7800.engine;
 import edu.towson.cosc442.halls7800.entity.Player;
 import edu.towson.cosc442.halls7800.item.EquippableItem;
 import edu.towson.cosc442.halls7800.item.Item;
+import edu.towson.cosc442.halls7800.world.Position;
 
 /**
  * Drops a whole stack from the pack onto the floor. Equipped items are unequipped first, unless
@@ -36,8 +37,10 @@ public record DropCommand(int slot) implements Command {
             }
         }
         String description = session.describe(item);
+        Position position = player.position();
         player.inventory().remove(item, item.quantity());
-        session.placeItem(player.position(), item);
-        return CommandResult.acted(player.actionCost(), "You drop " + description + ".");
+        String shrineMessage = ShrineAltars.onDrop(session, position, item);
+        session.placeItem(position, item);
+        return CommandResult.acted(player.actionCost(), "You drop " + description + "." + shrineMessage);
     }
 }

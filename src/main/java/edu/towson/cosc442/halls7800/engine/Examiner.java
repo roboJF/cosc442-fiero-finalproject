@@ -34,8 +34,9 @@ public final class Examiner {
         if (!floor.isInBounds(p) || !floor.isExplored(p)) {
             return "You haven't seen that spot.";
         }
+        String shrine = ShrineAltars.examine(session, p);
         if (!floor.isVisible(p)) {
-            return "You remember " + withArticle(floor.terrainAt(p).appearance().description()) + " there.";
+            return "You remember " + withArticle(floor.terrainAt(p).appearance().description()) + " there." + shrine;
         }
         List<String> parts = new ArrayList<>();
         Player player = session.player();
@@ -71,7 +72,7 @@ public final class Examiner {
             }
             parts.add("On the floor: " + String.join(", ", names) + ".");
         }
-        parts.add("Terrain: " + floor.terrainAt(p).appearance().description() + ".");
+        parts.add("Terrain: " + floor.terrainAt(p).appearance().description() + "." + shrine);
         return String.join(" ", parts);
     }
 

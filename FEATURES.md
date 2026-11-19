@@ -76,3 +76,21 @@ dungeons.
 8. Examining a shrine altar in look mode shows how many charges it has left, or says it is
    dormant. Existing seeds still generate identical floors, monsters and items, and run records
    that never drop an item on a shrine altar replay exactly as before.
+
+---
+
+## Selected and implemented feature — Option B, Shrine Altars
+
+- Stand on a shrine altar on floors 1–9 and use the existing Drop command (`R`, then the item’s
+  letter). Each altar starts with three charges. A single charge reveals a weapon or armor’s
+  upgrade and curse status, or identifies a whole potion or scroll kind for the run. Identified
+  scroll kinds count toward Scribe Irani’s Lost in Translation quest.
+- Cleansing a known curse costs two charges and sets the item’s upgrade to `+0`. An unknown
+  cursed item must be revealed on one drop and cleansed on a later drop. Items that cannot be
+  dropped, such as equipped cursed gear, leave the altar’s charges alone.
+- Look mode (`L`) shows the remaining charges or says the altar is dormant. Ordinary drops and
+  drops with insufficient charges use no power. The Atrium and Sanctum altars have no shrine
+  powers.
+- Each altar keeps its own charge count across floor visits. Version 4 saves reconstruct charges
+  and identification from recorded drops. Versions 1–3 retain their original drop behavior.
+  Shrine powers use the existing altar tiles and require no generation changes or random rolls.

@@ -9,8 +9,10 @@ public enum ActionRules {
     LEGACY(1),
     /** Version 2 introduced updated stun and guardian rules. */
     VERSION_2(2),
-    /** Rules used by new runs. */
-    CURRENT(3);
+    /** Version 3 introduced the shop, quest and shield fixes. */
+    VERSION_3(3),
+    /** Version 4 adds shrine altars. */
+    CURRENT(4);
 
     private final int recordVersion;
 
@@ -40,6 +42,11 @@ public enum ActionRules {
     /** @return whether the version 3 shop, quest and shield fixes apply */
     public boolean usesProgressFixes() {
         return recordVersion >= 3;
+    }
+
+    /** @return whether drops on shrine altars can identify or cleanse items */
+    boolean usesShrineAltars() {
+        return recordVersion >= 4;
     }
 
     /** @return whether a stun allows the creature to act at the start of the turn */

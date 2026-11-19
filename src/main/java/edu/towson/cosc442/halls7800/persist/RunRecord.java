@@ -13,7 +13,7 @@ import java.util.Objects;
  *
  * <p>Text format (one item per line):
  * <pre>
- * HALLS7800-RUN 3
+ * HALLS7800-RUN 4
  * seed=12345
  * difficulty=UNDERGRADUATE
  * name=Ada
