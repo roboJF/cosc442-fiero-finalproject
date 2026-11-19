@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Original chiptune music. The mood follows the descent: an upbeat tutorial and heroic title,
- * a warm Atrium, then each region of the Halls darker and slower than the last.
+ * Music for the game's screens and dungeon regions. The synthesized themes range from an upbeat
+ * tutorial and a heroic title theme to a warm Atrium and darker, slower dungeon music.
  *
  * <p>Notes are written as {@code NAME OCTAVE : EIGHTHS}, e.g. {@code C#5:2} is a C-sharp in octave
  * 5 lasting two eighth notes, and {@code R:4} is a half-note rest. Bars are separated by
@@ -79,7 +79,9 @@ public enum Tune {
     DEFEAT(84, false, Wave.TRIANGLE, Wave.TRIANGLE,
             "E5:2 D#5:2 D5:2 C#5:2 | C5:8",
             "A2:4 G#2:4 | A1:8",
-            "........", 0.95);
+            "........", 0.95),
+
+    KRIS("/audio/field-of-hopes-and-dreams-shinkonetcavy.mid");
 
     private final int bpm;
     private final boolean loops;
@@ -89,9 +91,19 @@ public enum Tune {
     private final String bass;
     private final String drums;
     private final double legato;
+    private final String midiResource;
 
     Tune(int bpm, boolean loops, Wave leadWave, Wave bassWave, String melody, String bass, String drums,
          double legato) {
+        this(bpm, loops, leadWave, bassWave, melody, bass, drums, legato, null);
+    }
+
+    Tune(String midiResource) {
+        this(0, true, null, null, "", "", "", 0, midiResource);
+    }
+
+    Tune(int bpm, boolean loops, Wave leadWave, Wave bassWave, String melody, String bass, String drums,
+         double legato, String midiResource) {
         this.bpm = bpm;
         this.loops = loops;
         this.leadWave = leadWave;
@@ -100,6 +112,11 @@ public enum Tune {
         this.bass = bass;
         this.drums = drums;
         this.legato = legato;
+        this.midiResource = midiResource;
+    }
+
+    String midiResource() {
+        return midiResource;
     }
 
     /** @return {@code true} if the tune repeats until changed; jingles play once */

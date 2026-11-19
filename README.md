@@ -98,7 +98,7 @@ Base package `edu.towson.cosc442.halls7800`:
 | `ui`, `app` | the JavaFX screens and the application entry points |
 
 The game rules have no JavaFX dependencies; the user interface only reads game state and submits
-commands. Music and sound effects are synthesized in code (`ui/audio`), so there are no audio files;
+commands. The standard themes and sound effects are synthesized in code (`ui/audio`);
 if a computer has no audio device, the game simply runs silently.
 
 ## A note on the characters

@@ -281,12 +281,11 @@ final class TileRenderer {
 
     /** Draws the player: a small adventurer in TU black and gold. */
     static void drawPlayer(GraphicsContext g, double x, double y, double s) {
-        drawPlayer(g, x, y, s, "");
+        drawPlayer(g, x, y, s, false);
     }
 
-    /** Draws the same player model with the palette selected by the player's name. */
-    static void drawPlayer(GraphicsContext g, double x, double y, double s, String name) {
-        boolean kris = "Kris".equals(name);
+    /** Draws the same player model with the selected palette. */
+    static void drawPlayer(GraphicsContext g, double x, double y, double s, boolean kris) {
         shadow(g, x, y, s);
         g.setFill(kris ? KRIS_HAIR : TU_GOLD);
         g.fillPolygon(new double[] {x + s * 0.28, x + s * 0.72, x + s * 0.8, x + s * 0.2},

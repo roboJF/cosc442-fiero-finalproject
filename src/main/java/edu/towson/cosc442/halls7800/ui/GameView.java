@@ -85,6 +85,7 @@ public final class GameView extends BorderPane implements Screen {
     private final GameSession session;
     private final Listener listener;
     private final AudioPlayer audio;
+    private final boolean kris;
     private final Label soundLabel = label(11, false);
     private final Canvas canvas = new Canvas();
     private final Label floorLabel = label(14, true);
@@ -119,6 +120,7 @@ public final class GameView extends BorderPane implements Screen {
         this.session = session;
         this.listener = listener;
         this.audio = audio;
+        this.kris = "Kris".equals(session.player().name());
         session.events().subscribe(audio::onEvent);
 
         Pane mapPane = new Pane(canvas);
@@ -297,7 +299,7 @@ public final class GameView extends BorderPane implements Screen {
 
     /** Redraws the whole screen from the current game state. */
     public void refresh() {
-        audio.playMusic(Tune.forSession(session));
+        audio.playMusic(kris && session.phase() == GamePhase.PLAYING ? Tune.KRIS : Tune.forSession(session));
         soundLabel.setText(!audio.isAvailable() ? "No audio device found"
                 : "Music " + (audio.isMusicOn() ? "on" : "off") + " (M)   Sound " + (audio.isSoundOn() ? "on" : "off") + " (N)");
         FloorView floor = session.currentFloor();
@@ -418,7 +420,7 @@ public final class GameView extends BorderPane implements Screen {
             }
         }
         TileRenderer.drawPlayer(g, (player.x() - originX) * tile, (player.y() - originY) * tile, tile,
-                session.player().name());
+                kris);
         if (lookCursor != null) {
             g.setStroke(Color.web("#f2c14e"));
             g.setLineWidth(2);

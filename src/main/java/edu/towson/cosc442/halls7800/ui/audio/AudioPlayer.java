@@ -1,15 +1,24 @@
 package edu.towson.cosc442.halls7800.ui.audio;
 
 import edu.towson.cosc442.halls7800.engine.GameEvent;
+import java.io.IOException;
+import java.net.URL;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.prefs.Preferences;
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Receiver;
+import javax.sound.midi.Sequence;
+import javax.sound.midi.Sequencer;
+import javax.sound.midi.Synthesizer;
+import javax.sound.midi.SysexMessage;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 
 /**
- * Plays the game's music and sound effects. Every sound is synthesized in code (see
- * {@link Synth}); there are no audio files.
+ * Plays the game's synthesized themes and sound effects (see {@link Synth}) and the bundled MIDI theme.
  *
  * <p>Music and sound effects can be switched on and off independently; the choices are
  * remembered between runs. If the computer has no usable audio device, the player quietly does
@@ -19,6 +28,7 @@ public class AudioPlayer {
 
     /** Overall loudness of the music (kept low so it stays in the background). */
     static final double MUSIC_GAIN = 0.3;
+    private static final double MIDI_GAIN = 0.6;
     /** Overall loudness of the sound effects. */
     static final double SFX_GAIN = 0.8;
 
@@ -32,6 +42,9 @@ public class AudioPlayer {
     private boolean musicOn;
     private boolean sfxOn;
     private Tune current;
+    private Sequencer sequencer;
+    private Synthesizer midiSynth;
+    private boolean midiUnavailable;
 
     /** Creates the player, reading the saved music and sound settings. */
     public AudioPlayer() {
@@ -63,6 +76,10 @@ public class AudioPlayer {
         if (current == null || !available || !musicOn) {
             return;
         }
+        if (current.midiResource() != null) {
+            startMidi();
+            return;
+        }
         try {
             Clip clip = tuneClips.computeIfAbsent(current, t -> open(t.render(MUSIC_GAIN)));
             if (clip == null) {
@@ -80,11 +97,61 @@ public class AudioPlayer {
     }
 
     private void stopMusic() {
+        if (sequencer != null) {
+            sequencer.stop();
+        }
         if (current != null) {
             Clip clip = tuneClips.get(current);
             if (clip != null) {
                 clip.stop();
             }
+        }
+    }
+
+    private void startMidi() {
+        if (midiUnavailable) {
+            return;
+        }
+        try {
+            if (sequencer == null) {
+                openMidi();
+            }
+            sequencer.setTickPosition(0);
+            sequencer.start();
+        } catch (IOException | InvalidMidiDataException | MidiUnavailableException | RuntimeException | LinkageError e) {
+            closeMidi();
+            midiUnavailable = true;
+        }
+    }
+
+    private void openMidi() throws IOException, InvalidMidiDataException, MidiUnavailableException {
+        URL resource = AudioPlayer.class.getResource(current.midiResource());
+        if (resource == null) {
+            throw new IOException("Missing MIDI resource " + current.midiResource());
+        }
+        Sequence sequence = MidiSystem.getSequence(resource);
+        sequencer = MidiSystem.getSequencer(false);
+        sequencer.open();
+        midiSynth = MidiSystem.getSynthesizer();
+        midiSynth.open();
+        Receiver output = midiSynth.getReceiver();
+        sequencer.getTransmitter().setReceiver(output);
+        // MIDI master volume is a 14-bit value, sent least significant byte first.
+        int volume = (int) Math.round(MIDI_GAIN * 0x3fff);
+        byte[] masterVolume = {0x7f, 0x7f, 0x04, 0x01, (byte) (volume & 0x7f), (byte) (volume >> 7), (byte) 0xf7};
+        output.send(new SysexMessage(SysexMessage.SYSTEM_EXCLUSIVE, masterVolume, masterVolume.length), -1);
+        sequencer.setSequence(sequence);
+        sequencer.setLoopCount(Sequencer.LOOP_CONTINUOUSLY);
+    }
+
+    private void closeMidi() {
+        if (sequencer != null) {
+            sequencer.close();
+            sequencer = null;
+        }
+        if (midiSynth != null) {
+            midiSynth.close();
+            midiSynth = null;
         }
     }
 
@@ -181,6 +248,7 @@ public class AudioPlayer {
 
     /** Stops everything and releases the audio device. */
     public void close() {
+        closeMidi();
         for (Clip c : tuneClips.values()) {
             c.close();
         }
